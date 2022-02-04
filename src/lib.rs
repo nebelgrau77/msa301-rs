@@ -51,7 +51,7 @@ where
     /// Clear selected bits using a bitmask
     fn clear_register_bit_flag(&mut self, address: Registers, bitmask: u8) -> Result<(), T::Error> {
         let mut reg_data = [0u8; 1];
-        self.interface.read(address.addr(), &mut reg_data)?;        
+        self.interface.read(address.addr(), &mut reg_data)?;
         let payload: u8 = reg_data[0] & !bitmask;
         self.interface.write(address.addr(), payload)?;
         Ok(())
@@ -76,7 +76,6 @@ where
         Ok((data & bitmask) != 0)
     }
 }
-
 
 /*
 
@@ -137,7 +136,7 @@ impl FIFO_MODE {
 
  */
 
- /*
+/*
 
 /// INT_DRDY pin configuration. (Refer to Table 19)
 #[allow(non_camel_case_types)]
@@ -201,29 +200,45 @@ impl INT_PIN {
 
  */
 
- /*
-
-/// Settings for various FIFO- and interrupt-related flags, Enabled or Disabled
+/// Settings for various bit flags that can be Active or Inactive
 #[allow(non_camel_case_types)]
 #[derive(Debug, Clone, Copy)]
 pub enum FLAG {
-    /// Enabled (bit set)
-    Enabled,
-    /// Disabled (bit cleared)
-    Disabled,
+    /// Active (bit set)
+    Active,
+    /// Inactive (bit cleared)
+    Inactive,
 }
 
 impl FLAG {
     pub fn status(self) -> bool {
         let status = match self {
-            FLAG::Disabled => false,
-            FLAG::Enabled => true,
+            FLAG::Inactive => false,
+            FLAG::Active => true,
         };
         status
     }
 }
 
- */
+/// Settings for various bit flags regarding activity and tap detection, whic can be either positive or negative
+#[allow(non_camel_case_types)]
+#[derive(Debug, Clone, Copy)]
+pub enum POLARITY {
+    /// Positive (bit set)
+    Positive,
+    /// Negaitive (bit cleared)
+    Negative,
+}
+
+impl POLARITY {
+    pub fn status(self) -> bool {
+        let status = match self {
+            POLARITY::Negative => false,
+            POLARITY::Positive => true,
+        };
+        status
+    }
+}
 
 /*
 
@@ -248,3 +263,81 @@ impl FIFO_ON {
 }
 
  */
+
+// --- THESE VALUES ARE READ ONLY -> WILL NEED MATCHING BITS TO ENUM FIELDS ---
+
+/// Orientation mode of the x/y axes selection. (Refer to page 22)
+#[allow(non_camel_case_types)]
+#[derive(Debug, Clone, Copy)]
+pub enum ORIENT_XY {
+    /// Portrait upright
+    PortraitUpright = 0b00,
+    /// Portrait upside down
+    PortraitUpsideDown = 0b01,
+    /// Landscape left
+    LandscapeLeft = 0b10,
+    /// Landscape right
+    LandscapeRight = 0b11,
+}
+
+impl ORIENT_XY {
+    pub fn value(self) -> u8 {
+        (self as u8) << 5 // shifted into the correct position, can be used directly
+    }
+}
+
+/// Orientation mode of the z axis selection. (Refer to page 22)
+#[allow(non_camel_case_types)]
+#[derive(Debug, Clone, Copy)]
+pub enum ORIENT_Z {
+    /// Upward looking
+    Upward = 0b00,
+    /// Downward looking
+    Downward = 0b01,
+}
+
+impl ORIENT_Z {
+    pub fn value(self) -> u8 {
+        self as u8 // shifted into the correct position, can be used directly
+    }
+}
+
+/// Resolution of X/Y/Z axes. (Refer to page 22)
+#[allow(non_camel_case_types)]
+#[derive(Debug, Clone, Copy)]
+pub enum RES {
+    /// 14-bit
+    _14bit = 0b00,
+    /// 12-bit
+    _12bit = 0b01,
+    /// 10-bit
+    _10bit = 0b00,
+    /// 8-bit
+    _8bit = 0b00,
+}
+
+impl RES {
+    pub fn value(self) -> u8 {
+        (self as u8) << 2 // shifted into the correct position
+    }
+}
+
+/// Acceleration range of X/Y/Z axes. (Refer to page 23)
+#[allow(non_camel_case_types)]
+#[derive(Debug, Clone, Copy)]
+pub enum RANGE {
+    /// +/-2g
+    _2g = 0b00,
+    /// +/-4g
+    _4g = 0b01,
+    /// +/-8g
+    _8g = 0b10,
+    /// +/-16g
+    _16g = 0b11,
+}
+
+impl RANGE {
+    pub fn value(self) -> u8 {
+        self as u8 // shifted into the correct position
+    }
+}
