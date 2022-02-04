@@ -79,7 +79,7 @@ where
 
 
 
-/// Output data rate and power mode selection (ODR). (Refer to page 23)
+/// Output data rate and power mode selection (ODR). (see page 23)
 #[allow(non_camel_case_types)]
 #[derive(Debug, Clone, Copy)]
 pub enum ODR {    
@@ -113,7 +113,7 @@ impl ODR {
     }
 }
 
-/// Low power bandwidth. (Refer to page 23)
+/// Low power bandwidth. (see page 23)
 #[allow(non_camel_case_types)]
 #[derive(Debug, Clone, Copy)]
 pub enum ODR {        
@@ -145,58 +145,7 @@ impl ODR {
 }
  
 
-/*
 
-/// FIFO mode selection. (Refer to Table 20)
-#[allow(non_camel_case_types)]
-#[derive(Debug, Clone, Copy)]
-pub enum FIFO_MODE {
-    /// Bypass mode
-    Bypass = 0b000,
-    /// FIFO mode
-    FIFO = 0b001,
-    /// Stream mode
-    Stream = 0b010,
-    /// Stream-to-FIFO mode
-    Stream_to_FIFO = 0b011,
-    /// Bypass-to-stream mode
-    Bypass_to_stream = 0b100,
-    /// Dynamic-stream mode
-    Dynamic_Stream = 0b110,
-    /// Bypass-to-FIFO mode
-    Bypass_to_FIFO = 0b111,
-}
-
-impl FIFO_MODE {
-    pub fn value(self) -> u8 {
-        (self as u8) << 5 // shifted into the correct position, can be used directly
-    }
-}
-
- */
-
-/*
-
-/// INT_DRDY pin configuration. (Refer to Table 19)
-#[allow(non_camel_case_types)]
-#[derive(Debug, Clone, Copy)]
-pub enum INT_DRDY {
-    /// Data signal (see CTRL_REG4)
-    DataSignal = 0b00,
-    /// Pressure high
-    P_high = 0b01,
-    /// Pressure low
-    P_low = 0b10,
-    /// Pressure low or high
-    P_low_or_high = 0b011,
-}
-
-impl INT_DRDY {
-    pub fn value(self) -> u8 {
-        self as u8 // no need to shift, bits 0:1 (INT_S)
-    }
-}
-*/
 /// Interrupt active setting for the INT1 pin: active high (default) or active low
 #[allow(non_camel_case_types)]
 #[derive(Debug, Clone, Copy)]
@@ -238,31 +187,66 @@ impl INT_PIN {
 }
 
  
-
-
-
-/// Settings for various bit flags that can be Active or Inactive
+/// Settings for various bit flags that can be Enabled (active) or Disabled (inactive)
 #[allow(non_camel_case_types)]
 #[derive(Debug, Clone, Copy)]
 pub enum FLAG {
-    
-    // -- WOULD IT BE BETTER TO KEEP ENABLE/DISABLE? --
-    
-    /// Active (bit set)    
-    Active,
-    /// Inactive (bit cleared)
-    Inactive,
+    /// Enable (bit set)    
+    Enable,
+    /// Disable (bit cleared)
+    Disable,
 }
 
 impl FLAG {
     pub fn status(self) -> bool {
         let status = match self {
-            FLAG::Inactive => false,
-            FLAG::Active => true,
+            FLAG::Disable => false,
+            FLAG::Enable => true,
         };
         status
     }
 }
+
+/// Settings for various bit flags regarding activity and tap detection, which can be either positive or negative
+#[allow(non_camel_case_types)]
+#[derive(Debug, Clone, Copy)]
+pub enum SIGN {
+    /// Positive (bit set)
+    Positive,
+    /// Negaitive (bit cleared)
+    Negative,
+}
+
+impl SIGN {
+    pub fn status(self) -> bool {
+        let status = match self {
+            POLARITY::Negative => false,
+            POLARITY::Positive => true,
+        };
+        status
+    }
+}
+
+/// Settings for various bit flags regarding axis polarity and output swapping, which can be either positive or negative
+#[allow(non_camel_case_types)]
+#[derive(Debug, Clone, Copy)]
+pub enum POLARITY {
+    /// Normal (not reversed) (bit cleared)
+    Normal,
+    /// Reversed/Swapped (bit set)
+    Reversed,
+}
+
+impl SIGN {
+    pub fn status(self) -> bool {
+        let status = match self {
+            POLARITY::Normal => false,
+            POLARITY::Reversed => true,
+        };
+        status
+    }
+}
+
 
 /// Settings for various bit flags regarding activity and tap detection, whic can be either positive or negative
 #[allow(non_camel_case_types)]
@@ -284,33 +268,8 @@ impl POLARITY {
     }
 }
 
-/*
 
-/// FIFO on/off
-#[allow(non_camel_case_types)]
-#[derive(Debug, Clone, Copy)]
-pub enum FIFO_ON {
-    /// Enabled (bit set)
-    Enabled,
-    /// Disabled (bit cleared)
-    Disabled,
-}
-
-impl FIFO_ON {
-    pub fn status(self) -> bool {
-        let status = match self {
-            FIFO_ON::Disabled => false,
-            FIFO_ON::Enabled => true,
-        };
-        status
-    }
-}
-
- */
-
-// --- THESE VALUES ARE READ ONLY -> WILL NEED MATCHING BITS TO ENUM FIELDS ---
-
-/// Orientation mode of the x/y axes selection. (Refer to page 22)
+/// Orientation mode of the x/y axes selection. (see page 22)
 #[allow(non_camel_case_types)]
 #[derive(Debug, Clone, Copy)]
 pub enum ORIENT_XY {
@@ -330,7 +289,7 @@ impl ORIENT_XY {
     }
 }
 
-/// Orientation mode of the z axis selection. (Refer to page 22)
+/// Orientation mode of the z axis selection. (see page 22)
 #[allow(non_camel_case_types)]
 #[derive(Debug, Clone, Copy)]
 pub enum ORIENT_Z {
@@ -346,7 +305,7 @@ impl ORIENT_Z {
     }
 }
 
-/// Resolution of X/Y/Z axes. (Refer to page 22)
+/// Resolution of X/Y/Z axes. (see page 22)
 #[allow(non_camel_case_types)]
 #[derive(Debug, Clone, Copy)]
 pub enum RES {
@@ -366,7 +325,7 @@ impl RES {
     }
 }
 
-/// Acceleration range of X/Y/Z axes. (Refer to page 23)
+/// Acceleration range of X/Y/Z axes. (see page 23)
 #[allow(non_camel_case_types)]
 #[derive(Debug, Clone, Copy)]
 pub enum RANGE {
@@ -386,7 +345,7 @@ impl RANGE {
     }
 }
 
-/// Power mode (Refer to page 23)
+/// Power mode (see page 23)
 #[allow(non_camel_case_types)]
 #[derive(Debug, Clone, Copy)]
 pub enum PWR_MODE {
@@ -405,7 +364,7 @@ impl PWR_MODE {
 }
 
 
-/// Interrupt latching (Refer to page 25)
+/// Interrupt latching (see page 25)
 #[allow(non_camel_case_types)]
 #[derive(Debug, Clone, Copy)]
 pub enum INT_LATCH {
@@ -442,5 +401,175 @@ pub enum INT_LATCH {
 impl INT_LATCH {
     pub fn value(self) -> u8 {
         self as u8 // shifted into the correct position
+    }
+}
+
+
+/// Tap quiet duration. (see page 27)
+#[allow(non_camel_case_types)]
+#[derive(Debug, Clone, Copy)]
+pub enum TAP_QUIET {
+    /// Tap quiet duration 30ms
+    _30ms = 0b00,
+    /// Tap quiet duration 50ms
+    _50ms =  0b01,
+}
+
+impl TAP_QUIET {
+    pub fn value(self) -> u8 {
+        (self as u8) << 7// shifted into the correct position, can be used directly
+    }
+}
+
+/// Tap shock duration. (see page 27)
+#[allow(non_camel_case_types)]
+#[derive(Debug, Clone, Copy)]
+pub enum TAP_SHOCK {
+    /// Tap shock duration 30ms
+    _50ms = 0b00,
+    /// Tap shock duration 50ms
+    _70ms =  0b01,
+}
+
+impl TAP_SHOCK {
+    pub fn value(self) -> u8 {
+        (self as u8) << 6 // shifted into the correct position, can be used directly
+    }
+}
+
+/// Time window length for the second shock (see page 27)
+#[allow(non_camel_case_types)]
+#[derive(Debug, Clone, Copy)]
+pub enum TAP_DUR {
+    /// 50 ms
+    _50ms = 0b000,
+    /// 100 ms
+    _100ms = 0b001,
+    /// 150 ms
+    _150ms = 0b010,
+    /// 200 ms
+    _200ms = 0b011,
+    /// 250 ms
+    _250ms = 0b100,
+    /// 375 ms
+    _375ms = 0b101,
+    /// 500 ms
+    _500ms = 0b110,
+    /// 700 ms
+    _700ms = 0b111,
+
+}
+
+impl TAP_DUR {
+    pub fn value(self) -> u8 {
+        (self as u8) // shifted into the correct position, can be used directly
+    }
+}
+
+/// Active interrupt threshold. (see page 26)
+#[allow(non_camel_case_types)]
+#[derive(Debug, Clone, Copy)]
+
+// --- ?????? --- CHECK ADAFRUIT DRIVER
+pub enum THS_RANGE {    
+    /*
+    /// +/-2g
+    _2g = 0b00,
+    /// +/-4g
+    _4g = 0b01,
+    /// +/-8g
+    _8g = 0b10,
+    /// +/-16g
+    _16g = 0b11,
+    */
+}
+
+impl THS_RANGE {
+    pub fn value(self) -> u8 {
+        self as u8 // shifted into the correct position
+    }
+}
+
+/// Tap threshold range. (see page 27)
+#[allow(non_camel_case_types)]
+#[derive(Debug, Clone, Copy)]
+
+// --- ?????? --- CHECK ADAFRUIT DRIVER
+pub enum TAP_THS {    
+    /*
+    /// +/-2g
+    _2g = 0b00,
+    /// +/-4g
+    _4g = 0b01,
+    /// +/-8g
+    _8g = 0b10,
+    /// +/-16g
+    _16g = 0b11,
+    */
+}
+
+impl TAP_THS {
+    pub fn value(self) -> u8 {
+        self as u8 // shifted into the correct position
+    }
+}
+
+
+/// Orientation interrupt blocking mode
+pub enum ORIENT_BLOCK {
+    /// No blocking 
+    NoBlock = 0b00,
+    /// Z-axis blocking 
+    ZaxisBlock = 0b01,
+    /// Z-axis blocking or slope in any axis > 0.2g 
+    ZaxisBlockOrSlope = 0b10,
+    
+    // --- CHECK ADAFRUIT'S DRIVER ---
+
+}
+
+impl ORIENT_BLOCK {
+    pub fn value(self) -> u8 {
+        (self as u8) << 2 // shifted into position
+    }
+}
+    
+/// Orientation interrupt threshold setting
+pub enum ORIENT_MODE {
+    /// Symmetrical 
+    Symmetrical = 0b00,
+    /// High-asymmetrical 
+    HighAsymmetrical = 0b01,
+    /// Low-asymmetrical
+    LowAsymmetrical = 0b10,
+    
+    // --- CHECK ADAFRUIT'S DRIVER ---
+
+}
+
+impl ORIENT_MODE {
+    pub fn value(self) -> u8 {
+        self as u8 // shifted into position
+    }
+}
+
+
+/// Freefall mode. (see page 26)
+#[allow(non_camel_case_types)]
+#[derive(Debug, Clone, Copy)]
+pub enum FREEFALL_MODE {
+    /// Single mode
+    Single,
+    /// Sum mode
+    Sum,
+}
+
+impl FREEFALL_MODE {
+    pub fn status(self) -> bool {
+        let status = match self {
+            FREEFALL_MODE::Single => false,
+            FREEFALL_MODE::Sum => true,
+        };
+        status
     }
 }
