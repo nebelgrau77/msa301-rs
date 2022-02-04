@@ -404,20 +404,43 @@ impl PWR_MODE {
     }
 }
 
-/*
-0000: non-latched
-0001: tempoary latched 250ms
-0010: tempoary latched 500ms
-0011: tempoary latched 1s
-0100: tempoary latched 2s
-0101: tempoary latched 4s
-0110: tempoary latched 8s
-0111: latched
-1000: non-latched
-1001: tempoary latched 1ms
-1010: tempoary latched 1ms
-1011: tempoary latched 2ms
-1100: tempoary latched 25ms
-1101: tempoary latched 50ms
-1110: tempoary latched 100m
-*/
+
+/// Interrupt latching (Refer to page 25)
+#[allow(non_camel_case_types)]
+#[derive(Debug, Clone, Copy)]
+pub enum INT_LATCH {
+ /// Non-latched
+ NonLatched = 0b0000,
+ /// temporary latched 250ms 0b0001
+ TempLatch_250ms = 0b0001,
+ /// temporary latched 500ms 0b0010
+ TempLatch_500ms = 0b0010, 
+ /// temporary latched 1s = 0b0011, 
+ TempLatch_1s = 0b0011, 
+ /// temporary latched 2s = 0b0100, 
+ TempLatch_2s = 0b0100, 
+ /// temporary latched 4s = 0b0101, 
+ TempLatch_4s = 0b0101, 
+ /// temporary latched 8s = 0b0110, 
+ TempLatch_8s = 0b0110, 
+ /// latched = 0b0111, 
+ Latched = 0b0111,  
+ /// temporary latched 1ms = 0b1001, 
+ TempLatch_1ms = 0b1001, 
+ /// temporary latched 1ms = 0b1010, 
+ TempLatch_1ms = 0b1010, 
+ /// temporary latched 2ms = 0b1011, 
+ TempLatch_2ms = 0b1011, 
+ /// temporary latched 25ms = 0b1100, 
+ TempLatch_25ms = 0b1100, 
+ /// temporary latched 50ms = 0b1101, 
+ TempLatch_50ms = 0b1101, 
+ /// temporary latched 100ms = 0b1110, 
+ TempLatch_100ms = 0b1110, 
+}
+
+impl INT_LATCH {
+    pub fn value(self) -> u8 {
+        self as u8 // shifted into the correct position
+    }
+}
