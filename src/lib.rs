@@ -77,34 +77,73 @@ where
     }
 }
 
-/*
 
-/// Output data rate and power mode selection (ODR). (Refer to Table 17)
+
+/// Output data rate and power mode selection (ODR). (Refer to page 23)
 #[allow(non_camel_case_types)]
 #[derive(Debug, Clone, Copy)]
-pub enum ODR {
-    /// Power-down / One-shot mode enabled
-    PowerDown = 0b000,
-    /// 1 Hz
-    _1Hz = 0b001,
-    /// 10 Hz
-    _10Hz = 0b010,
-    /// 25 Hz
-    _25Hz = 0b011,
-    /// 50 Hz
-    _50Hz = 0b100,
-    /// 75 Hz
-    _75Hz = 0b101,
+pub enum ODR {    
+    /// 1 Hz (not available in normal mode)
+    _1Hz = 0b0000,
+    /// 1.95 Hz (not available in normal mode)
+    _1_95Hz = 0b0001,
+    /// 3.90 Hz
+    _3_90Hz = 0b0010,
+    /// 7.81 Hz
+    _7_81Hz = 0b0011,
+    /// 15.63 Hz    
+    _15_63Hz = 0b0100,
+    /// 31.25Hz
+    _31_25Hz = 0b0101,
+    // 62.5Hz
+    _62_5Hz = 0b0110,
+    // 125Hz 
+    _125Hz = 0b0111,
+    // 250Hz 
+    _250Hz = 0b1000,
+    // 500Hz (not available in low power mode)
+    _500Hz = 0b1001,
+    // 1000Hz (not available in low power mode)
+    _1000Hz = 0b1010,    
 }
 
 impl ODR {
     pub fn value(self) -> u8 {
-        (self as u8) << 4
+        self as u8
     }
 }
 
+/// Low power bandwidth. (Refer to page 23)
+#[allow(non_camel_case_types)]
+#[derive(Debug, Clone, Copy)]
+pub enum ODR {        
+    /// 1.95 Hz 
+    _1_95Hz = 0b0010,
+    /// 3.90 Hz
+    _3_90Hz = 0b0011,
+    /// 7.81 Hz
+    _7_81Hz = 0b0100,
+    /// 15.63 Hz    
+    _15_63Hz = 0b0101,
+    /// 31.25Hz
+    _31_25Hz = 0b0110,
+    // 62.5Hz
+    _62_5Hz = 0b0111,
+    // 125Hz 
+    _125Hz = 0b1000,
+    // 250Hz 
+    _250Hz = 0b1001,
+    // 500Hz
+    _500Hz = 0b1010,
+    
+}
 
- */
+impl ODR {
+    pub fn value(self) -> u8 {
+        self as u8
+    }
+}
+ 
 
 /*
 
@@ -157,8 +196,8 @@ impl INT_DRDY {
         self as u8 // no need to shift, bits 0:1 (INT_S)
     }
 }
-
-/// Interrupt active setting for the INT_DRDY pin: active high (default) or active low
+*/
+/// Interrupt active setting for the INT1 pin: active high (default) or active low
 #[allow(non_camel_case_types)]
 #[derive(Debug, Clone, Copy)]
 pub enum INT_ACTIVE {
@@ -178,7 +217,7 @@ impl INT_ACTIVE {
     }
 }
 
-/// Interrupt pad setting for INT_DRDY pin: push-pull (default) or open-drain.
+/// Interrupt pad setting for INT1 pin: push-pull (default) or open-drain.
 #[allow(non_camel_case_types)]
 #[derive(Debug, Clone, Copy)]
 pub enum INT_PIN {
@@ -198,13 +237,18 @@ impl INT_PIN {
     }
 }
 
- */
+ 
+
+
 
 /// Settings for various bit flags that can be Active or Inactive
 #[allow(non_camel_case_types)]
 #[derive(Debug, Clone, Copy)]
 pub enum FLAG {
-    /// Active (bit set)
+    
+    // -- WOULD IT BE BETTER TO KEEP ENABLE/DISABLE? --
+    
+    /// Active (bit set)    
     Active,
     /// Inactive (bit cleared)
     Inactive,
@@ -341,3 +385,39 @@ impl RANGE {
         self as u8 // shifted into the correct position
     }
 }
+
+/// Power mode (Refer to page 23)
+#[allow(non_camel_case_types)]
+#[derive(Debug, Clone, Copy)]
+pub enum PWR_MODE {
+    /// Normal mode
+    Normal = 0b00,
+    /// Low power mode
+    LowPower = 0b01,
+    /// Suspend mode
+    Suspend = 0b10,    
+}
+
+impl PWR_MODE {
+    pub fn value(self) -> u8 {
+        (self as u8)  << 6 // shifted into the correct position
+    }
+}
+
+/*
+0000: non-latched
+0001: tempoary latched 250ms
+0010: tempoary latched 500ms
+0011: tempoary latched 1s
+0100: tempoary latched 2s
+0101: tempoary latched 4s
+0110: tempoary latched 8s
+0111: latched
+1000: non-latched
+1001: tempoary latched 1ms
+1010: tempoary latched 1ms
+1011: tempoary latched 2ms
+1100: tempoary latched 25ms
+1101: tempoary latched 50ms
+1110: tempoary latched 100m
+*/
