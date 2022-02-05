@@ -4,6 +4,13 @@
 
 use super::*;
 
+impl<I2C, E> MSA301<I2C>
+where
+    I2C: Write<Error = E> + WriteRead<Error = E>,
+{
+}
+
+
 /*
 
 /// Interrupt pin settings

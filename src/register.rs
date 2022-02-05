@@ -75,7 +75,6 @@ pub enum Registers {
     OFFSET_Z = 0x3A,
 }
 
-
 impl Registers {
     pub fn addr(self) -> u8 {
         self as u8
@@ -87,9 +86,8 @@ impl Registers {
 pub struct Bitmasks;
 #[allow(dead_code)]
 impl Bitmasks {
-    
-
     // === INTERRUPT_CFG (0x0B) ===
-    // pub (crate) const AUTORIFP: u8 = 0b1000_0000;
-    
+    pub (crate) const NEW_DATA_INT: u8 = 0b0000_0001;
 }
+
+
