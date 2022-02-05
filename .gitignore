@@ -10,3 +10,4 @@ notes.md
 **/*.rs.bkp
 /target
 *.pdf
+*.PDF
