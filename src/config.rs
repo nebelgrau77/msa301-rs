@@ -1,6 +1,7 @@
 //! Various functions related to configuration
 //!
 //! TO DO: check if all the functions are implemented
+//! 
 
 use super::*;
 
@@ -10,6 +11,18 @@ where
     T: Interface<Error = E>,
 {
  */
+
+
+// --- DEFAULT CONFIGURATION ---
+
+//! the default configuration in the Adafruit driver has:
+//! - all axes enabled (default setting enabled)
+//! - power mode normal (default setting suspended mode)
+//! - data rate 500 Hz (default setting 1000 Hz)
+//! - bandwidth 250 Hz (default setting 500 Hz)
+//! - range 4G (default range is 2g)
+//! - resolution 14 bit  (default resolution)
+
 
 
 impl<I2C, E> MSA301<I2C>

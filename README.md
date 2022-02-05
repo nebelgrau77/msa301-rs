@@ -11,7 +11,7 @@ Inspired by and partially based on [another STMicroelectronics MEMS driver](http
 [Adafruit's description and C++ driver](https://learn.adafruit.com/msa301-triple-axis-accelerometer) used as a reference.
 
 This driver allows you to:
-- ...
+- read the device ID (0x13)
 
 ## WORK IN PROGRESS:
 
@@ -20,7 +20,6 @@ This library is work in progress. Not all features are implemented yet. Currentl
 ### TO DO:
 
 - [ ] everything!
-
 
 ## The device
 
@@ -34,8 +33,6 @@ The MSA301 is a small and low cost triple-axis accelerometer. It features:
 * Tap, Double-tap, orientation & freefall detection
 
 Datasheet: [MSA301](hhttps://github.com/adafruit/Adafruit_MSA301/blob/master/MSA301-V1.0-ENG.PDF)
-
-
 
 ## Usage
 

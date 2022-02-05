@@ -7,10 +7,16 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+- `get_device_id` function to read the PART_ID
+- RaspberryPi example using `get_device_id`
+
+### Changed
+- Use simple I2C-only interface based on the PCF8563 crate instead of the more complex solution with SPI, multiple addresses etc.
 
 ## [0.0.1] - 2022-02-03
 
 ### Added
-- All the necessary module files based on the lps2x drivers.
+- basic crate structure and necessary modules
 
 [0.0.1]: https://github.com/nebelgrau77/msa301-rs/releases/tag/v0.0.1
