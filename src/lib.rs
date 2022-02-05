@@ -6,75 +6,97 @@
 //#![deny(warnings, missing_docs)]
 
 pub mod sensor;
-
 pub mod config;
-
 pub mod fifo;
-
 pub mod interrupt;
-
 pub mod register;
 use register::{Bitmasks, Registers};
 
-pub mod interface;
-use interface::Interface;
+//pub mod interface;
+// use interface::Interface;
+
+use embedded_hal as hal;
+use hal::blocking::i2c::{Write, WriteRead};
 
 /// Sensor's ID
 // const PARTID: u8 = 0x13; // decimal value 19
 
-/// Holds the driver instance with the selected interface
-pub struct MSA301<T> {
-    interface: T,
+
+/// I2C device address
+const DEV_ADDR: u8 = 0b000100110;
+
+/// All possible errors in this crate
+#[derive(Debug)]
+pub enum Error<E> {
+    /// I2C bus error
+    I2C(E),
+    /// Invalid input data
+    InvalidInputData,
 }
 
-impl<T, E> MSA301<T>
+/// Holds the driver instance with the selected interface
+#[derive(Debug, Default)]
+pub struct MSA301<I2C> {
+    /// The concrete I2C device implementation
+    i2c: I2C,
+}
+
+impl <I2C, E> MSA301<I2C>
 where
-    T: Interface<Error = E>,
+    I2C: Write<Error = E> + WriteRead<Error = E>,
 {
     /// Create a new instance of the LPS25HB driver.
-    pub fn new(interface: T) -> Self {
-        MSA301 { interface }
+    pub fn new(i2c: I2C) -> Self {
+        MSA301 { i2c }
     }
 
     /// Destroy driver instance, return interface instance.
-    pub fn destroy(self) -> T {
-        self.interface
+    pub fn destroy(self) -> I2C {
+        self.i2c
     }
 
-    /// Read a byte from the given register.
-    fn read_register(&mut self, address: Registers) -> Result<u8, T::Error> {
-        let mut reg_data = [0u8];
-        self.interface.read(address.addr(), &mut reg_data)?;
-        Ok(reg_data[0])
+    /// Write to a register
+    fn write_register(&mut self, address: Registers, data: u8) -> Result<(), Error<E>> {
+        let payload: [u8; 2] = [address.addr(), data];
+        self.i2c.write(DEV_ADDR, &payload).map_err(Error::I2C)
     }
 
-    /// Clear selected bits using a bitmask
-    fn clear_register_bit_flag(&mut self, address: Registers, bitmask: u8) -> Result<(), T::Error> {
-        let mut reg_data = [0u8; 1];
-        self.interface.read(address.addr(), &mut reg_data)?;
-        let payload: u8 = reg_data[0] & !bitmask;
-        self.interface.write(address.addr(), payload)?;
-        Ok(())
+    /// Read from a register
+    // REMOVE PUB LATER
+    pub fn read_register(&mut self, address: Registers) -> Result<u8, Error<E>> {
+        let mut data: [u8; 1] = [0];
+        self.i2c
+            .write_read(DEV_ADDR, &[address.addr()], &mut data)
+            .map_err(Error::I2C)
+            .and(Ok(data[0]))
     }
 
-    /// Set selected bits using a bitmask
-    fn set_register_bit_flag(&mut self, address: Registers, bitmask: u8) -> Result<(), T::Error> {
-        let mut reg_data = [0u8; 1];
-        self.interface.read(address.addr(), &mut reg_data)?;
-        let payload: u8 = reg_data[0] | bitmask;
-        self.interface.write(address.addr(), payload)?;
-        Ok(())
+    /// Set specific bits using a bitmask
+    fn set_register_bit_flag(&mut self, address: Registers, bitmask: u8) -> Result<(), Error<E>> {
+        let data = self.read_register(address)?;
+        if (data & bitmask) == 0 {
+            self.write_register(address, data | bitmask)            
+        } else {
+            Ok(())
+        }
+    }
+
+    /// Clear specific bits using a bitmask
+    fn clear_register_bit_flag(&mut self, address: Registers, bitmask: u8) -> Result<(), Error<E>> {
+        let data = self.read_register(address)?;
+        if (data & bitmask) != 0 {
+            self.write_register(address, data & !bitmask)
+        } else {
+            Ok(())
+        }
     }
 
     /// Check if specific bits are set.
-    fn is_register_bit_flag_high(
-        &mut self,
-        address: Registers,
-        bitmask: u8,
-    ) -> Result<bool, T::Error> {
+    fn is_register_bit_flag_high(&mut self, address: Registers, bitmask: u8) -> Result<bool, Error<E>> {
         let data = self.read_register(address)?;
         Ok((data & bitmask) != 0)
     }
+
 }
 
 
@@ -116,7 +138,7 @@ impl ODR {
 /// Low power bandwidth. (see page 23)
 #[allow(non_camel_case_types)]
 #[derive(Debug, Clone, Copy)]
-pub enum ODR {        
+pub enum BW {        
     /// 1.95 Hz 
     _1_95Hz = 0b0010,
     /// 3.90 Hz
@@ -138,12 +160,52 @@ pub enum ODR {
     
 }
 
-impl ODR {
+impl BW {
     pub fn value(self) -> u8 {
         self as u8
     }
 }
  
+/// Resolution of X/Y/Z axes. (see page 22)
+#[allow(non_camel_case_types)]
+#[derive(Debug, Clone, Copy)]
+pub enum RES {
+    /// 14-bit
+    _14bit = 0b00,
+    /// 12-bit
+    _12bit = 0b01,
+    /// 10-bit
+    _10bit = 0b10,
+    /// 8-bit
+    _8bit = 0b11,
+}
+
+impl RES {
+    pub fn value(self) -> u8 {
+        (self as u8) << 2 // shifted into the correct position
+    }
+}
+
+/// Acceleration range of X/Y/Z axes. (see page 23)
+#[allow(non_camel_case_types)]
+#[derive(Debug, Clone, Copy)]
+pub enum RANGE {
+    /// +/-2g
+    _2g = 0b00,
+    /// +/-4g
+    _4g = 0b01,
+    /// +/-8g
+    _8g = 0b10,
+    /// +/-16g
+    _16g = 0b11,
+}
+
+impl RANGE {
+    pub fn value(self) -> u8 {
+        self as u8 // shifted into the correct position
+    }
+}
+
 
 
 /// Interrupt active setting for the INT1 pin: active high (default) or active low
@@ -220,8 +282,8 @@ pub enum SIGN {
 impl SIGN {
     pub fn status(self) -> bool {
         let status = match self {
-            POLARITY::Negative => false,
-            POLARITY::Positive => true,
+            SIGN::Negative => false,
+            SIGN::Positive => true,
         };
         status
     }
@@ -237,7 +299,7 @@ pub enum POLARITY {
     Reversed,
 }
 
-impl SIGN {
+impl POLARITY {
     pub fn status(self) -> bool {
         let status = match self {
             POLARITY::Normal => false,
@@ -247,26 +309,6 @@ impl SIGN {
     }
 }
 
-
-/// Settings for various bit flags regarding activity and tap detection, whic can be either positive or negative
-#[allow(non_camel_case_types)]
-#[derive(Debug, Clone, Copy)]
-pub enum POLARITY {
-    /// Positive (bit set)
-    Positive,
-    /// Negaitive (bit cleared)
-    Negative,
-}
-
-impl POLARITY {
-    pub fn status(self) -> bool {
-        let status = match self {
-            POLARITY::Negative => false,
-            POLARITY::Positive => true,
-        };
-        status
-    }
-}
 
 
 /// Orientation mode of the x/y axes selection. (see page 22)
@@ -305,45 +347,7 @@ impl ORIENT_Z {
     }
 }
 
-/// Resolution of X/Y/Z axes. (see page 22)
-#[allow(non_camel_case_types)]
-#[derive(Debug, Clone, Copy)]
-pub enum RES {
-    /// 14-bit
-    _14bit = 0b00,
-    /// 12-bit
-    _12bit = 0b01,
-    /// 10-bit
-    _10bit = 0b00,
-    /// 8-bit
-    _8bit = 0b00,
-}
 
-impl RES {
-    pub fn value(self) -> u8 {
-        (self as u8) << 2 // shifted into the correct position
-    }
-}
-
-/// Acceleration range of X/Y/Z axes. (see page 23)
-#[allow(non_camel_case_types)]
-#[derive(Debug, Clone, Copy)]
-pub enum RANGE {
-    /// +/-2g
-    _2g = 0b00,
-    /// +/-4g
-    _4g = 0b01,
-    /// +/-8g
-    _8g = 0b10,
-    /// +/-16g
-    _16g = 0b11,
-}
-
-impl RANGE {
-    pub fn value(self) -> u8 {
-        self as u8 // shifted into the correct position
-    }
-}
 
 /// Power mode (see page 23)
 #[allow(non_camel_case_types)]
@@ -387,7 +391,11 @@ pub enum INT_LATCH {
  /// temporary latched 1ms = 0b1001, 
  TempLatch_1ms = 0b1001, 
  /// temporary latched 1ms = 0b1010, 
- TempLatch_1ms = 0b1010, 
+ 
+
+// --- CHECK ADAFRUIT DRIVER! --
+
+// TempLatch_1ms = 0b1010, 
  /// temporary latched 2ms = 0b1011, 
  TempLatch_2ms = 0b1011, 
  /// temporary latched 25ms = 0b1100, 

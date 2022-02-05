@@ -16,15 +16,16 @@ pub struct DataStatus {
 }
  */
 
-impl<T, E> MSA301<T>
+impl<I2C, E> MSA301<I2C>
 where
-    T: Interface<Error = E>,
+    I2C: Write<Error = E> + WriteRead<Error = E>,
 {
+
     /// Read the device ID ("who am I")
-    pub fn get_device_id(&mut self) -> Result<u8, T::Error> {
-        let mut data = [0u8; 1];
-        self.interface.read(Registers::WHO_AM_I.addr(), &mut data)?;
-        let whoami = data[0];
+    pub fn get_device_id(&mut self) -> Result<u8, Error<E>> {
+        //let mut data = [0u8; 1];
+        //self.interface.read(Registers::PART_ID.addr(), &mut data)?;        
+        let whoami = self.read_register(Registers::PART_ID)?;
         Ok(whoami)
     }
 

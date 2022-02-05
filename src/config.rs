@@ -4,11 +4,21 @@
 
 use super::*;
 
+/*
 impl<T, E> MSA301<T>
 where
     T: Interface<Error = E>,
 {
+ */
+
+
+impl<I2C, E> MSA301<I2C>
+where
+    I2C: Write<Error = E> + WriteRead<Error = E>,
+{
     
+
+
     /*
     /// Set output data rate        
     
