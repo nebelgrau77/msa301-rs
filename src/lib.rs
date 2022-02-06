@@ -97,6 +97,14 @@ where
         Ok((data & bitmask) != 0)
     }
 
+
+    /// Enable all axes
+    pub fn enable_axes(&mut self) -> Result<(), Error<E>> {
+        self.write_register(Registers::CFG_ODR, 0b1110_1111)?;
+        Ok(())
+    }
+
+
 }
 
 
@@ -470,7 +478,7 @@ pub enum TAP_DUR {
 
 impl TAP_DUR {
     pub fn value(self) -> u8 {
-        (self as u8) // shifted into the correct position, can be used directly
+        self as u8 // shifted into the correct position, can be used directly
     }
 }
 

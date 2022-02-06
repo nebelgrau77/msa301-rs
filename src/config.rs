@@ -15,13 +15,13 @@ where
 
 // --- DEFAULT CONFIGURATION ---
 
-//! the default configuration in the Adafruit driver has:
-//! - all axes enabled (default setting enabled)
-//! - power mode normal (default setting suspended mode)
-//! - data rate 500 Hz (default setting 1000 Hz)
-//! - bandwidth 250 Hz (default setting 500 Hz)
-//! - range 4G (default range is 2g)
-//! - resolution 14 bit  (default resolution)
+// the default configuration in the Adafruit driver has:
+// - all axes enabled (default setting enabled)
+// - power mode normal (default setting suspended mode)
+// - data rate 500 Hz (default setting 1000 Hz)
+// - bandwidth 250 Hz (default setting 500 Hz)
+// - range 4G (default range is 2g)
+// - resolution 14 bit  (default resolution)
 
 
 
