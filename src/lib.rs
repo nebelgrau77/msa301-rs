@@ -100,11 +100,12 @@ where
 
     /// Enable all axes
     pub fn enable_axes(&mut self) -> Result<(), Error<E>> {
-        self.write_register(Registers::CFG_ODR, 0b1110_1111)?;
+        self.write_register(Registers::CFG_ODR, 0b0000_1111)?;
         Ok(())
     }
 
 
+    
 }
 
 

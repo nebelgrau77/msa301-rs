@@ -88,6 +88,20 @@ pub struct Bitmasks;
 impl Bitmasks {
     // === INTERRUPT_CFG (0x0B) ===
     pub (crate) const NEW_DATA_INT: u8 = 0b0000_0001;
+
+
+    // === INT_SET_0 (0x16) ===
+    pub (crate) const ORIENT_INT_EN: u8 = 0b0100_0000;
+    pub (crate) const S_TAP_INT_EN: u8 = 0b0010_0000;
+    pub (crate) const D_TAP_INT_EN: u8 = 0b0001_0000;
+    pub (crate) const ACTIVE_INT_EN_Z: u8 = 0b0000_0100;
+    pub (crate) const ACTIVE_INT_EN_Y: u8 = 0b0000_0010;
+    pub (crate) const ACTIVE_INT_EN_X: u8 = 0b0000_0001;
+
+
+    // === INT_SET_1 (0x17) ===
+    pub (crate) const NEW_DATA_INT_EN: u8 = 0b0001_0000;
+    pub (crate) const FREEFALL_INT_EN: u8 = 0b0000_1000;
 }
 
 

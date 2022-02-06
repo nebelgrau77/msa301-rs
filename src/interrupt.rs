@@ -8,6 +8,79 @@ impl<I2C, E> MSA301<I2C>
 where
     I2C: Write<Error = E> + WriteRead<Error = E>,
 {
+
+    /// Enable/disable new data interrupt
+    pub fn new_data_int(&mut self, flag: FLAG) -> Result<(), Error<E>> {        
+        match flag {
+            FLAG::Disable => self.clear_register_bit_flag(Registers::INT_SET1, Bitmasks::NEW_DATA_INT_EN)?,
+            FLAG::Enable => self.set_register_bit_flag(Registers::INT_SET1, Bitmasks::NEW_DATA_INT_EN)?,
+        }
+        Ok(())
+    }
+    
+    /// Enable/disable freefall interrupt
+    pub fn freefall_int(&mut self, flag: FLAG) -> Result<(), Error<E>> {        
+       match flag {
+           FLAG::Disable => self.clear_register_bit_flag(Registers::INT_SET1, Bitmasks::FREEFALL_INT_EN)?,
+           FLAG::Enable => self.set_register_bit_flag(Registers::INT_SET1, Bitmasks::FREEFALL_INT_EN)?,
+       }
+       Ok(())
+    }
+
+    /// Enable/disable orientation interrupt
+    pub fn orient_int(&mut self, flag: FLAG) -> Result<(), Error<E>> {        
+        match flag {
+            FLAG::Disable => self.clear_register_bit_flag(Registers::INT_SET0, Bitmasks::ORIENT_INT_EN)?,
+            FLAG::Enable => self.set_register_bit_flag(Registers::INT_SET0, Bitmasks::ORIENT_INT_EN)?,
+        }
+        Ok(())
+    }
+
+    /// Enable/disable single tap interrupt
+    pub fn single_tap_int(&mut self, flag: FLAG) -> Result<(), Error<E>> {        
+        match flag {
+            FLAG::Disable => self.clear_register_bit_flag(Registers::INT_SET0, Bitmasks::S_TAP_INT_EN)?,
+            FLAG::Enable => self.set_register_bit_flag(Registers::INT_SET0, Bitmasks::S_TAP_INT_EN)?,
+        }
+        Ok(())
+    }
+
+    /// Enable/disable double tap interrupt
+    pub fn double_tap_int(&mut self, flag: FLAG) -> Result<(), Error<E>> {        
+        match flag {
+            FLAG::Disable => self.clear_register_bit_flag(Registers::INT_SET0, Bitmasks::D_TAP_INT_EN)?,
+            FLAG::Enable => self.set_register_bit_flag(Registers::INT_SET0, Bitmasks::D_TAP_INT_EN)?,
+        }
+        Ok(())
+    }
+
+    /// Enable/disable active interrupt for X axis
+    pub fn active_xaxis_int(&mut self, flag: FLAG) -> Result<(), Error<E>> {        
+        match flag {
+            FLAG::Disable => self.clear_register_bit_flag(Registers::INT_SET0, Bitmasks::ACTIVE_INT_EN_X)?,
+            FLAG::Enable => self.set_register_bit_flag(Registers::INT_SET0, Bitmasks::ACTIVE_INT_EN_X)?,
+        }
+        Ok(())
+    }
+
+    /// Enable/disable active interrupt for Y axis
+    pub fn active_yaxis_int(&mut self, flag: FLAG) -> Result<(), Error<E>> {        
+        match flag {
+            FLAG::Disable => self.clear_register_bit_flag(Registers::INT_SET0, Bitmasks::ACTIVE_INT_EN_Y)?,
+            FLAG::Enable => self.set_register_bit_flag(Registers::INT_SET0, Bitmasks::ACTIVE_INT_EN_Y)?,
+        }
+        Ok(())
+    }
+
+    /// Enable/disable active interrupt for Z axis
+    pub fn active_zaxis_int(&mut self, flag: FLAG) -> Result<(), Error<E>> {        
+        match flag {
+            FLAG::Disable => self.clear_register_bit_flag(Registers::INT_SET0, Bitmasks::ACTIVE_INT_EN_Z)?,
+            FLAG::Enable => self.set_register_bit_flag(Registers::INT_SET0, Bitmasks::ACTIVE_INT_EN_Z)?,
+        }
+        Ok(())
+    }
+
 }
 
 

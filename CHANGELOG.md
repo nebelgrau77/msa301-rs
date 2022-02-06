@@ -10,6 +10,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 - `get_device_id` function to read the PART_ID
 - RaspberryPi example using `get_device_id`
+- `new_data_int` interrupt enabling/disabling
+- `freefall_int` interrupt enabling/disabling
+- `single_tap_int` interrupt enabling/disabling
+- `double_tap_int` interrupt enabling/disabling
+- `orient_tap_int` interrupt enabling/disabling
+- `active_xaxis_int` interrupt enabling/disabling
+- `active_yaxis_int` interrupt enabling/disabling
+- `active_zaxis_int` interrupt enabling/disabling
 
 ### Changed
 - Use simple I2C-only interface based on the PCF8563 crate instead of the more complex solution with SPI, multiple addresses etc.
