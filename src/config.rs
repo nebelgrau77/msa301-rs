@@ -30,7 +30,7 @@ where
     I2C: Write<Error = E> + WriteRead<Error = E>,
 {
     /// Set output data rate
-    pub fn set_datarate(&self, odr: ODR) -> Result<(), Error<>> {
+    pub fn set_datarate(&mut self, odr: ODR) -> Result<(), Error<E>> {
         let reg = self.read_register(Registers::CFG_ODR)?;
 
         let mut data = reg & !Bitmasks::ODR_MASK;
@@ -42,7 +42,7 @@ where
     }
 
     /// Set bandwidth
-    pub fn set_bandwidth(&self, bandwidth: BW) -> Result<(), Error<>> {
+    pub fn set_bandwidth(&mut self, bandwidth: BW) -> Result<(), Error<E>> {
         let reg = self.read_register(Registers::PWR_BW)?;     
         let mut data = reg & !Bitmasks::BW_MASK;
         data |= bandwidth.value();      
@@ -51,7 +51,7 @@ where
     }
 
     /// Set power mode
-    pub fn set_power_mode(&self, powermode: PWR_MODE) -> Result<(), Error<>> {
+    pub fn set_power_mode(&mut self, powermode: PWR_MODE) -> Result<(), Error<E>> {
         let reg = self.read_register(Registers::PWR_BW)?;     
         let mut data = reg & !Bitmasks::PWR_MASK;
         data |= powermode.value();      

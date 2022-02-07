@@ -171,10 +171,30 @@ pub enum BW {
 
 impl BW {
     pub fn value(self) -> u8 {
-        self as u8
+        (self as u8) << 1 // shifted into position
     }
 }
  
+
+/// Power mode (see page 23)
+#[allow(non_camel_case_types)]
+#[derive(Debug, Clone, Copy)]
+pub enum PWR_MODE {
+    /// Normal mode
+    Normal = 0b00,
+    /// Low power mode
+    LowPower = 0b01,
+    /// Suspend mode
+    Suspend = 0b10,    
+}
+
+impl PWR_MODE {
+    pub fn value(self) -> u8 {
+        (self as u8)  << 6 // shifted into the correct position
+    }
+}
+
+
 /// Resolution of X/Y/Z axes. (see page 22)
 #[allow(non_camel_case_types)]
 #[derive(Debug, Clone, Copy)]
@@ -358,23 +378,6 @@ impl ORIENT_Z {
 
 
 
-/// Power mode (see page 23)
-#[allow(non_camel_case_types)]
-#[derive(Debug, Clone, Copy)]
-pub enum PWR_MODE {
-    /// Normal mode
-    Normal = 0b00,
-    /// Low power mode
-    LowPower = 0b01,
-    /// Suspend mode
-    Suspend = 0b10,    
-}
-
-impl PWR_MODE {
-    pub fn value(self) -> u8 {
-        (self as u8)  << 6 // shifted into the correct position
-    }
-}
 
 
 /// Interrupt latching (see page 25)
