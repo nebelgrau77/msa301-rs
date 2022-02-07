@@ -20,14 +20,29 @@ fn main() {
 
     //let reg = msa301.read_register(msa301::register::Registers::Z_COMP).unwrap();
 
-    msa301.set_datarate(ODR::_500Hz).unwrap();
-    msa301.set_bandwidth(BW::_250Hz).unwrap();
+    msa301.set_datarate(ODR::_7_81Hz).unwrap();
+    msa301.set_bandwidth(BW::_3_90Hz).unwrap();
     msa301.set_power_mode(PWR_MODE::Normal).unwrap();
 
     let cfgodr = msa301.read_register(msa301::register::Registers::CFG_ODR).unwrap();
     let bwpwr = msa301.read_register(msa301::register::Registers::PWR_BW).unwrap();
 
-    println!("Register values: cfg_odr {}, bw_pwr {}\n", cfgodr, bwpwr);
+    //println!("Register values: cfg_odr {}, bw_pwr {}\n", cfgodr, bwpwr);
+
+    let (xl,xh,yl,yh,zl,zh) = msa301.read_raw().unwrap();
+
+    let x_l = msa301.read_register(Registers::XAXIS_L).unwrap();
+    let x_h = msa301.read_register(Registers::XAXIS_H).unwrap();
+    let y_l = msa301.read_register(Registers::YAXIS_L).unwrap();
+    let y_h = msa301.read_register(Registers::YAXIS_H).unwrap();
+    let z_l = msa301.read_register(Registers::ZAXIS_L).unwrap();
+    let z_h = msa301.read_register(Registers::ZAXIS_H).unwrap();
+
+    println!("raw readings: XL {}, XH {}, YL {}, YH {}, ZL {}, ZH {}\r\n",
+                xl, xh, yl, yh, zl, zh);
+
+    println!("single reg readings: XL {}, XH {}, YL {}, YH {}, ZL {}, ZH {}\r\n",
+                x_l, x_h, y_l, y_h, z_l, z_h);
 
     // let reg = msa301.read_register(msa301::register::Registers::INT_SET0).unwrap();
 
@@ -49,7 +64,7 @@ fn main() {
     println!("Interrupt disabled\n",);
     */
     
-    
+    /*
 
     loop {
         
@@ -66,5 +81,6 @@ fn main() {
     //println!("Axis readings: x: {} {}, y: {} {}, z: {} {}\n", xlo, xhi, ylo, yhi, zlo, zhi);
     println!("Axis readings: z: {} {}\n", zlo, zhi);
     }
+     */
   
 }

@@ -18,6 +18,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - `active_xaxis_int` interrupt enabling/disabling
 - `active_yaxis_int` interrupt enabling/disabling
 - `active_zaxis_int` interrupt enabling/disabling
+- `set_datarate`, `set_bandwidth` and `set_power_mode` added to config.rs
+- first draft of `read_raw` added, working
 
 ### Changed
 - Use simple I2C-only interface based on the PCF8563 crate instead of the more complex solution with SPI, multiple addresses etc.
