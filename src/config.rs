@@ -29,8 +29,35 @@ impl<I2C, E> MSA301<I2C>
 where
     I2C: Write<Error = E> + WriteRead<Error = E>,
 {
-    
+    /// Set output data rate
+    pub fn set_datarate(&self, odr: ODR) -> Result<(), Error<>> {
+        let reg = self.read_register(Registers::CFG_ODR)?;
 
+        let mut data = reg & !Bitmasks::ODR_MASK;
+        data |= odr.value();
+
+        self.write_register(Registers::CFG_ODR, data)?;
+
+        Ok(())
+    }
+
+    /// Set bandwidth
+    pub fn set_bandwidth(&self, bandwidth: BW) -> Result<(), Error<>> {
+        let reg = self.read_register(Registers::PWR_BW)?;     
+        let mut data = reg & !Bitmasks::BW_MASK;
+        data |= bandwidth.value();      
+        self.write_register(Registers::PWR_BW, data)?;      
+        Ok(())
+    }
+
+    /// Set power mode
+    pub fn set_power_mode(&self, powermode: PWR_MODE) -> Result<(), Error<>> {
+        let reg = self.read_register(Registers::PWR_BW)?;     
+        let mut data = reg & !Bitmasks::PWR_MASK;
+        data |= powermode.value();      
+        self.write_register(Registers::PWR_BW, data)?;      
+        Ok(())
+    }
 
     /*
     /// Set output data rate        

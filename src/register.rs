@@ -98,6 +98,12 @@ impl Bitmasks {
     pub (crate) const ACTIVE_INT_EN_Y: u8 = 0b0000_0010;
     pub (crate) const ACTIVE_INT_EN_X: u8 = 0b0000_0001;
 
+    // === CFG_ODR (0x10) ===
+    pub (crate) const ODR_MASK: u8 = 0b0000_1111;
+
+    // === PWR_BW (0x11) ===
+    pub (crate) const BW_MASK: u8 = 0b0001_1110;
+    pub (crate) const PWR_MASK: u8 = 0b1100_0000;
 
     // === INT_SET_1 (0x17) ===
     pub (crate) const NEW_DATA_INT_EN: u8 = 0b0001_0000;
