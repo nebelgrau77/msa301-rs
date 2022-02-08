@@ -29,6 +29,15 @@ where
         Ok(whoami)
     }
 
+
+    /// read raw sensor values
+    pub fn read_raw(&mut self) -> Result<(u8, u8, u8, u8, u8, u8), Error<E>> {
+        let mut data = [0_u8;6];
+        self.i2c.write_read(DEV_ADDR, &[Registers::XAXIS_L.addr()], &mut data)
+        .map_err(Error::I2C)
+        .and(Ok((data[0],data[1],data[2],data[3],data[4],data[5])))
+    }
+
     /*
 
      /// Calculated pressure reading in hPa
