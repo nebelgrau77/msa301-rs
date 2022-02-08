@@ -55,6 +55,43 @@ impl Default for AccelConfig {
 
 impl AccelConfig {
     // do I need this or it's enough to call various setting functions in the `init()` function?
+    fn res_range(&self) -> u8 {
+        let mut data: u8 = 0;
+        data |= self.range.value();
+        data |= self.resolution.value();
+        data
+    }
+
+    fn cfg_odr(&self) -> u8 {
+        let mut data: u8 = 0b1110_0000;
+        let (x,y,z) = self.enable_axes;
+        if x {
+            data = data & !0b1000_0000 // clear bit 7
+        }
+        if y {
+            data = data & !0b0100_0000 // clear bit 6
+        }
+        if z {
+            data = data & !0b0010_0000 // clear bit 5
+        }
+
+        data |= self.datarate.value();
+
+        data
+
+    }
+
+    fn pwr_bw(&self) -> u8 {
+        let mut data: u8 = 0;
+        data |= self.bandwidth.value();
+        data |= self.powermode.value();
+    }
+
+
+
+
+
+
 }
 
 

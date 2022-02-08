@@ -12,6 +12,7 @@ pub mod interrupt;
 pub mod register;
 use core::iter::FlatMap;
 
+use config::AccelConfig;
 use register::{Bitmasks, Registers};
 
 //pub mod interface;
@@ -99,13 +100,12 @@ where
         Ok((data & bitmask) != 0)
     }
 
-
-    /// Enable all axes
-    pub fn enable_axes(&mut self) -> Result<(), Error<E>> {
-        self.write_register(Registers::CFG_ODR, 0b0000_1111)?;
+    pub fn init_sensor(&mut self, config: AccelConfig) -> Result<(), Error<E>> {
+        self.write_register(Registers::CFG_ODR, config.cfg_odr())?;
+        self.write_register(Registers::PWR_BW, config.pwr_bw())?;
+        self.write_register(Registers::RES_RANGE, config.res_range())?;
         Ok(())
     }
-
 
     
 }
