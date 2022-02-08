@@ -59,6 +59,24 @@ where
         Ok(())
     }
 
+    /// Set resolution in bits
+    pub fn set_resolution(&self, resolution: RES) -> Result<(), Error<>> {
+        let reg = self.read_register(Registers::RES_RANGE)?;     
+        let mut data = reg & !Bitmasks::RESOLUTION;
+        data |= resolution.value();      
+        self.write_register(Registers::RES_RANGE, data)?;      
+        Ok(())
+    }
+
+    /// Set acceleration range (full scale)
+    pub fn set_range(&self, range: RANGE) -> Result<(), Error<>> {
+        let reg = self.read_register(Registers::RES_RANGE)?;     
+        let mut data = reg & !Bitmasks::FS;
+        data |= range.value();      
+        self.write_register(Registers::RES_RANGE, data)?;      
+        Ok(())
+    }
+
     /*
     /// Set output data rate        
     
