@@ -8,6 +8,18 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased]
 
 ### Added
+
+- `read_raw` and `read accel` added
+- `AccelConfig` added
+- `init` function added
+
+### Changed
+- enum names are now CamelCase
+- MSA301 struct holds the AccelConfig struct
+
+## [0.0.2] - 2022-02-08
+
+### Added
 - `get_device_id` function to read the PART_ID
 - RaspberryPi example using `get_device_id`
 - `new_data_int` interrupt enabling/disabling
@@ -19,7 +31,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - `active_yaxis_int` interrupt enabling/disabling
 - `active_zaxis_int` interrupt enabling/disabling
 - `set_datarate`, `set_bandwidth` and `set_power_mode` added to config.rs
-- first draft of `read_raw` added, working
 
 ### Changed
 - Use simple I2C-only interface based on the PCF8563 crate instead of the more complex solution with SPI, multiple addresses etc.

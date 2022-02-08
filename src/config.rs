@@ -1,17 +1,11 @@
 //! Various functions related to configuration
 //!
-//! TO DO: check if all the functions are implemented
+//! TO DO: 
+//! * check if all the functions are implemented
+//! * how to limit datarate/bandwidth settings for the normal and low power mode?//! 
 //! 
 
 use super::*;
-
-/*
-impl<T, E> MSA301<T>
-where
-    T: Interface<Error = E>,
-{
- */
-
 
 // --- DEFAULT CONFIGURATION ---
 
@@ -55,45 +49,46 @@ impl Default for AccelConfig {
 
 impl AccelConfig {
     // do I need this or it's enough to call various setting functions in the `init()` function?
-    fn res_range(&self) -> u8 {
+    /// Values to be written to the RES_RANGE register
+    pub (crate) fn res_range(&self) -> u8 {
         let mut data: u8 = 0;
         data |= self.range.value();
         data |= self.resolution.value();
         data
     }
 
-    fn cfg_odr(&self) -> u8 {
-        let mut data: u8 = 0b1110_0000;
+    /// Values to be written to the CFG_ODR register
+    /// Output data rate and enabling X/Y/Z axes
+    pub (crate) fn cfg_odr(&self) -> u8 {
+        let mut data: u8 = 0b1110_0000; // if bits 7:5 are set, all axes are DISABLED
         let (x,y,z) = self.enable_axes;
         if x {
-            data = data & !0b1000_0000 // clear bit 7
+            data = data & !0b1000_0000 // clear bit 7 to enable axis X
         }
         if y {
-            data = data & !0b0100_0000 // clear bit 6
+            data = data & !0b0100_0000 // clear bit 6 to enable axis Y
         }
         if z {
-            data = data & !0b0010_0000 // clear bit 5
+            data = data & !0b0010_0000 // clear bit 5 to enable axis Z
         }
 
         data |= self.datarate.value();
-
         data
 
     }
 
-    fn pwr_bw(&self) -> u8 {
+    /// Values to be written to the PWR_BW register
+    /// Bandwidth and power mode settings
+    pub (crate) fn pwr_bw(&self) -> u8 {
         let mut data: u8 = 0;
         data |= self.bandwidth.value();
         data |= self.powermode.value();
+        data
     }
-
-
-
-
-
-
 }
 
+
+// === ARE THESE FUNCTIONS NECESSARY? === 
 
 impl<I2C, E> MSA301<I2C>
 where
@@ -130,7 +125,7 @@ where
     }
 
     /// Set resolution in bits
-    pub fn set_resolution(&self, resolution: Res) -> Result<(), Error<>> {
+    pub fn set_resolution(&mut self, resolution: Res) -> Result<(), Error<E>> {
         let reg = self.read_register(Registers::RES_RANGE)?;     
         let mut data = reg & !Bitmasks::RESOLUTION;
         data |= resolution.value();      
@@ -139,99 +134,12 @@ where
     }
 
     /// Set acceleration range (full scale)
-    pub fn set_range(&self, range: Range) -> Result<(), Error<>> {
+    pub fn set_range(&mut self, range: Range) -> Result<(), Error<E>> {
         let reg = self.read_register(Registers::RES_RANGE)?;     
         let mut data = reg & !Bitmasks::FS;
         data |= range.value();      
         self.write_register(Registers::RES_RANGE, data)?;      
         Ok(())
     }
-
-    /*
-    /// Set output data rate        
-    
-    pub fn set_datarate(&mut self, odr: DataRate) -> Result<(), T::Error> {
-        let mut reg_data = [0u8];
-        self.interface
-            .read(Registers::CTRL_REG1.addr(), &mut reg_data)?;
-        let mut payload = reg_data[0];
-        payload &= !Bitmasks::DataRate_MASK;
-        payload |= odr.value();
-        self.interface.write(Registers::CTRL_REG1.addr(), payload)?;
-        Ok(())
-    }
-     */
-    
-    
-    /*
-
-    /// Register address automatically incremented during a multiple byte access with a serial interface (I2C or SPI).
-    /// Default value: enabled
-    pub fn address_incrementing(&mut self, flag: bool) -> Result<(), T::Error> {
-        match flag {
-            true => self.set_register_bit_flag(Registers::CTRL_REG2, Bitmasks::IF_ADD_INC),
-            false => self.clear_register_bit_flag(Registers::CTRL_REG2, Bitmasks::IF_ADD_INC),
-        }
-    }
-
-     */ 
-
-    /*
-
-    /// Reboot. Refreshes the content of the internal registers stored in the Flash memory block.
-    /// At device power-up the content of the Flash memory block is transferred to the internal registers
-    /// related to the trimming functions to allow correct behavior of the device itself.
-    /// If for any reason the content of the trimming registers is modified,
-    /// it is sufficient to use this bit to restore the correct values.
-    /// At the end of the boot process the BOOT bit is set again to ‘0’ by hardware.
-    /// The BOOT bit takes effect after one ODR clock cycle.
-    pub fn reboot(&mut self) -> Result<(), T::Error> {
-        self.set_register_bit_flag(Registers::CTRL_REG2, Bitmasks::BOOT)
-    }
-
-    /// Is reboot phase running?
-    pub fn reboot_running(&mut self) -> Result<bool, T::Error> {
-        self.is_register_bit_flag_high(Registers::INT_SOURCE, Bitmasks::BOOT_STATUS)
-    }
-
-    /// Run software reset (resets the device to the power-on configuration, takes 4 usec)
-    pub fn software_reset(&mut self) -> Result<(), T::Error> {
-        self.set_register_bit_flag(Registers::CTRL_REG2, Bitmasks::SWRESET)
-    }
-
-     */
-
-    /*
-
-    // SWITCHING INTO POWER-DOWN COULD BE ADDED TO THIS FUNCTION
-    /// Enable low-power mode (must be done only with the device in power-down mode)
-    pub fn enable_low_power(&mut self) -> Result<(), T::Error> {
-        self.set_register_bit_flag(Registers::RES_CONF, Bitmasks::LC_EN)
-    }
-
-    // LOWPASS FILTER ENABLING AND CONFIGURING COULD BE MOVED TOGETHER
-
-    /// Enable and configure low-pass filter on pressure data in Continuous mode
-    pub fn lowpass_filter(&mut self, enable: bool, configure: bool) -> Result<(), T::Error> {
-        match enable {
-            true => self.set_register_bit_flag(Registers::CTRL_REG1, Bitmasks::EN_LPFP),
-            false => self.clear_register_bit_flag(Registers::CTRL_REG1, Bitmasks::EN_LPFP),
-        }?;
-        match configure {
-            true => self.set_register_bit_flag(Registers::CTRL_REG1, Bitmasks::LPFP_CFG),
-            false => self.clear_register_bit_flag(Registers::CTRL_REG1, Bitmasks::LPFP_CFG),
-        }?;
-        Ok(())
-    }
    
-    /// Reset low-pass filter.  If the LPFP is active, in order to avoid the transitory phase,
-    /// the filter can be reset by reading this register before generating pressure measurements.
-    pub fn lowpass_filter_reset(&mut self) -> Result<(), T::Error> {
-        let mut _data = [0u8; 1];
-        self.interface
-            .read(Registers::LPFP_RES.addr(), &mut _data)?;
-        Ok(())
-    }
-
-     */
 }

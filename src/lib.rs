@@ -10,20 +10,15 @@ pub mod config;
 pub mod fifo;
 pub mod interrupt;
 pub mod register;
-use core::iter::FlatMap;
 
 use config::AccelConfig;
 use register::{Bitmasks, Registers};
-
-//pub mod interface;
-// use interface::Interface;
 
 use embedded_hal as hal;
 use hal::blocking::i2c::{Write, WriteRead};
 
 /// Sensor's ID
 // const PARTID: u8 = 0x13; // decimal value 19
-
 
 /// I2C device address
 const DEV_ADDR: u8 = 0b000100110;
@@ -37,11 +32,12 @@ pub enum Error<E> {
     InvalidInputData,
 }
 
-/// Holds the driver instance with the selected interface
+/// Holds the driver instance with I2C interface and configuration struct
 #[derive(Debug, Default)]
 pub struct MSA301<I2C> {
     /// The concrete I2C device implementation
     i2c: I2C,
+    config: AccelConfig,
 }
 
 impl <I2C, E> MSA301<I2C>
@@ -49,13 +45,21 @@ where
     I2C: Write<Error = E> + WriteRead<Error = E>,
 {
     /// Create a new instance of the LPS25HB driver.
-    pub fn new(i2c: I2C) -> Self {
-        MSA301 { i2c }
+    pub fn new(i2c: I2C, config: AccelConfig) -> Self {
+        MSA301 { i2c, config }
     }
 
     /// Destroy driver instance, return interface instance.
     pub fn destroy(self) -> I2C {
         self.i2c
+    }
+
+    /// Initialize sensor with a chosen configuration (default configuration can be used)
+    pub fn init_sensor(&mut self, config: AccelConfig) -> Result<(), Error<E>> {
+        self.write_register(Registers::CFG_ODR, config.cfg_odr())?;
+        self.write_register(Registers::PWR_BW, config.pwr_bw())?;
+        self.write_register(Registers::RES_RANGE, config.res_range())?;
+        Ok(())
     }
 
     /// Write to a register
@@ -64,8 +68,9 @@ where
         self.i2c.write(DEV_ADDR, &payload).map_err(Error::I2C)
     }
 
-    /// Read from a register
-    // REMOVE PUB LATER
+    // === REMOVE PUB LATER ===
+
+    /// Read from a register    
     pub fn read_register(&mut self, address: Registers) -> Result<u8, Error<E>> {
         let mut data: [u8; 1] = [0];
         self.i2c
@@ -73,6 +78,8 @@ where
             .map_err(Error::I2C)
             .and(Ok(data[0]))
     }
+
+    // === THESE FUNCTIONS MAY NOT BE NECESSARY ===
 
     /// Set specific bits using a bitmask
     fn set_register_bit_flag(&mut self, address: Registers, bitmask: u8) -> Result<(), Error<E>> {
@@ -99,14 +106,6 @@ where
         let data = self.read_register(address)?;
         Ok((data & bitmask) != 0)
     }
-
-    pub fn init_sensor(&mut self, config: AccelConfig) -> Result<(), Error<E>> {
-        self.write_register(Registers::CFG_ODR, config.cfg_odr())?;
-        self.write_register(Registers::PWR_BW, config.pwr_bw())?;
-        self.write_register(Registers::RES_RANGE, config.res_range())?;
-        Ok(())
-    }
-
     
 }
 
@@ -168,7 +167,6 @@ pub enum BandWidth {
     _250Hz = 0b1001,
     // 500Hz
     _500Hz = 0b1010,
-    
 }
 
 impl BandWidth {
@@ -177,7 +175,6 @@ impl BandWidth {
     }
 }
  
-
 /// Power mode (see page 23)
 #[allow(non_camel_case_types)]
 #[derive(Debug, Clone, Copy)]
@@ -195,7 +192,6 @@ impl PowerMode {
         (self as u8)  << 6 // shifted into the correct position
     }
 }
-
 
 /// Resolution of X/Y/Z axes. (see page 22)
 #[allow(non_camel_case_types)]
@@ -246,11 +242,7 @@ impl Range {
             _16g => 512,
         }
     }
-
 }
-
-
-
 /// Interrupt active setting for the INT1 pin: active high (default) or active low
 #[allow(non_camel_case_types)]
 #[derive(Debug, Clone, Copy)]
@@ -290,7 +282,6 @@ impl IntPin {
         status
     }
 }
-
  
 /// Settings for various bit flags that can be Enabled (active) or Disabled (inactive)
 #[allow(non_camel_case_types)]
@@ -325,8 +316,8 @@ pub enum Sign {
 impl Sign {
     pub fn status(self) -> bool {
         let status = match self {
-            SIGN::Negative => false,
-            SIGN::Positive => true,
+            Sign::Negative => false,
+            Sign::Positive => true,
         };
         status
     }
@@ -351,8 +342,6 @@ impl Polarity{
         status
     }
 }
-
-
 
 /// Orientation mode of the x/y axes selection. (see page 22)
 #[allow(non_camel_case_types)]
@@ -390,46 +379,41 @@ impl OrientZ {
     }
 }
 
-
-
-
-
 /// Interrupt latching (see page 25)
 #[allow(non_camel_case_types)]
 #[derive(Debug, Clone, Copy)]
 pub enum IntLatch {
- /// Non-latched
- NonLatched = 0b0000,
- /// temporary latched 250ms 0b0001
- TempLatch_250ms = 0b0001,
- /// temporary latched 500ms 0b0010
- TempLatch_500ms = 0b0010, 
- /// temporary latched 1s = 0b0011, 
- TempLatch_1s = 0b0011, 
- /// temporary latched 2s = 0b0100, 
- TempLatch_2s = 0b0100, 
- /// temporary latched 4s = 0b0101, 
- TempLatch_4s = 0b0101, 
- /// temporary latched 8s = 0b0110, 
- TempLatch_8s = 0b0110, 
- /// latched = 0b0111, 
- Latched = 0b0111,  
- /// temporary latched 1ms = 0b1001, 
- TempLatch_1ms = 0b1001, 
- /// temporary latched 1ms = 0b1010, 
+    /// Non-latched
+    NonLatched = 0b0000,
+    /// temporary latched 250ms 0b0001
+    TempLatch_250ms = 0b0001,
+    /// temporary latched 500ms 0b0010
+    TempLatch_500ms = 0b0010, 
+    /// temporary latched 1s = 0b0011, 
+    TempLatch_1s = 0b0011, 
+    /// temporary latched 2s = 0b0100, 
+    TempLatch_2s = 0b0100, 
+    /// temporary latched 4s = 0b0101, 
+    TempLatch_4s = 0b0101, 
+    /// temporary latched 8s = 0b0110, 
+    TempLatch_8s = 0b0110, 
+    /// latched = 0b0111, 
+    Latched = 0b0111,  
+    /// temporary latched 1ms = 0b1001, 
+    TempLatch_1ms = 0b1001, 
+    /// temporary latched 1ms = 0b1010, 
  
+    // --- CHECK ADAFRUIT DRIVER! --
 
-// --- CHECK ADAFRUIT DRIVER! --
-
-// TempLatch_1ms = 0b1010, 
- /// temporary latched 2ms = 0b1011, 
- TempLatch_2ms = 0b1011, 
- /// temporary latched 25ms = 0b1100, 
- TempLatch_25ms = 0b1100, 
- /// temporary latched 50ms = 0b1101, 
- TempLatch_50ms = 0b1101, 
- /// temporary latched 100ms = 0b1110, 
- TempLatch_100ms = 0b1110, 
+    // TempLatch_1ms = 0b1010, 
+    /// temporary latched 2ms = 0b1011, 
+    TempLatch_2ms = 0b1011, 
+    /// temporary latched 25ms = 0b1100, 
+    TempLatch_25ms = 0b1100, 
+    /// temporary latched 50ms = 0b1101, 
+    TempLatch_50ms = 0b1101, 
+    /// temporary latched 100ms = 0b1110, 
+    TempLatch_100ms = 0b1110, 
 }
 
 impl IntLatch {
@@ -437,7 +421,6 @@ impl IntLatch {
         self as u8 // shifted into the correct position
     }
 }
-
 
 /// Tap quiet duration. (see page 27)
 #[allow(non_camel_case_types)]
@@ -491,7 +474,6 @@ pub enum TapDur {
     _500ms = 0b110,
     /// 700 ms
     _700ms = 0b111,
-
 }
 
 impl TapDur {
@@ -548,7 +530,6 @@ impl TapThresh {
     }
 }
 
-
 /// Orientation interrupt blocking mode
 pub enum OrientBlock {
     /// No blocking 
@@ -559,7 +540,6 @@ pub enum OrientBlock {
     ZaxisBlockOrSlope = 0b10,
     
     // --- CHECK ADAFRUIT'S DRIVER ---
-
 }
 
 impl OrientBlock {
@@ -578,7 +558,6 @@ pub enum OrientMode {
     LowAsymmetrical = 0b10,
     
     // --- CHECK ADAFRUIT'S DRIVER ---
-
 }
 
 impl OrientMode {
@@ -586,7 +565,6 @@ impl OrientMode {
         self as u8 // shifted into position
     }
 }
-
 
 /// Freefall mode. (see page 26)
 #[allow(non_camel_case_types)]

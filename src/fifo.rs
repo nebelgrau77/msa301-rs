@@ -1,6 +1,7 @@
 //! Various functions related to FIFO
 //! 
 //! - check if all FIFO-related functions are implemented
+//! - is a FIFO config struct necessary?
 
 use super::*;
 

@@ -1,6 +1,9 @@
 //! Various functions related to interrupts
 //!
-//! TO DO: check if all functions related to the interrupts are covered
+//! TO DO: 
+//! * check if all functions related to the interrupts are covered
+//! * is an interrupt config struct necessary?
+//! * is a status struct necessary?
 
 use super::*;
 
