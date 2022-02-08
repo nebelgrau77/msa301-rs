@@ -23,6 +23,39 @@ where
 // - range 4G (default range is 2g)
 // - resolution 14 bit  (default resolution)
 
+/// Accelerometer settings to configure the sensor
+#[derive(Debug)]
+pub struct AccelConfig {
+    /// Axes X,Y,Z enabled
+    pub enable_axes: (bool, bool, bool),
+    /// Set power mode
+    pub powermode: PowerMode,
+    /// Set output datarate    
+    pub datarate: DataRate,
+    /// Set bandwidth
+    pub bandwidth: BandWidth,    
+    /// Set resolution in bits
+    pub resolution: Res,
+    /// Set full scale range
+    pub range: Range,
+}
+
+impl Default for AccelConfig {
+    fn default() -> Self {
+        AccelConfig {
+            enable_axes: (true, true, true),
+            powermode: PowerMode::Normal,
+            datarate: DataRate::_500Hz,
+            bandwidth: BandWidth::_250Hz,
+            resolution: Res::_14bit,
+            range: Range::_4g,
+        }
+    }
+}
+
+impl AccelConfig {
+    // do I need this or it's enough to call various setting functions in the `init()` function?
+}
 
 
 impl<I2C, E> MSA301<I2C>
