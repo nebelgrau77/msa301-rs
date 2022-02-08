@@ -31,12 +31,39 @@ where
 
 
     /// read raw sensor values
-    pub fn read_raw(&mut self) -> Result<(u8, u8, u8, u8, u8, u8), Error<E>> {
+    pub fn read_accel_raw(&mut self) -> Result<(u8, u8, u8, u8, u8, u8), Error<E>> {
         let mut data = [0_u8;6];
         self.i2c.write_read(DEV_ADDR, &[Registers::XAXIS_L.addr()], &mut data)
         .map_err(Error::I2C)
         .and(Ok((data[0],data[1],data[2],data[3],data[4],data[5])))
     }
+
+    pub fn read_accel(&mut self) -> Result<(f32, f32, f32), Error<E>> {
+        let (x_lo, x_hi, y_lo, y_hi, z_lo, z_hi) = self.read_accel_raw()?;
+
+        // scale can be retrieved using the .sensitivity method
+        // but the Range has to be stored somewhere, in settings
+        // otherwise there must be a get_range function to read the bytes
+        // corresponding to the Range setting
+
+        let scale: u16 = 1024; // some arbitrary scale, to be replaced later
+
+        let mut raw_x: u16 = (x_hi << 8) + x_lo as u16; 
+        raw_x = raw_x >> 2;
+        let x: f32 = raw_x as f32 / scale as f32
+
+        let mut raw_y: u16 = (y_hi << 8) + y_lo as u16; 
+        raw_y = raw_y >> 2;
+        let y: f32 = raw_y as f32 / scale as f32;
+
+        let mut raw_z: u16 = (z_hi << 8) + z_lo as u16; 
+        raw_z = raw_z >> 2;
+        let z: f32 = raw_z as f32 / scale as f32;
+
+        Ok((x,y,z))
+
+    }
+
 
     /*
 

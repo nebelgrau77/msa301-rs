@@ -30,7 +30,7 @@ where
     I2C: Write<Error = E> + WriteRead<Error = E>,
 {
     /// Set output data rate
-    pub fn set_datarate(&mut self, odr: ODR) -> Result<(), Error<E>> {
+    pub fn set_datarate(&mut self, odr: DataRate) -> Result<(), Error<E>> {
         let reg = self.read_register(Registers::CFG_ODR)?;
 
         let mut data = reg & !Bitmasks::ODR_MASK;
@@ -42,7 +42,7 @@ where
     }
 
     /// Set bandwidth
-    pub fn set_bandwidth(&mut self, bandwidth: BW) -> Result<(), Error<E>> {
+    pub fn set_bandwidth(&mut self, bandwidth: BandWidth) -> Result<(), Error<E>> {
         let reg = self.read_register(Registers::PWR_BW)?;     
         let mut data = reg & !Bitmasks::BW_MASK;
         data |= bandwidth.value();      
@@ -51,7 +51,7 @@ where
     }
 
     /// Set power mode
-    pub fn set_power_mode(&mut self, powermode: PWR_MODE) -> Result<(), Error<E>> {
+    pub fn set_power_mode(&mut self, powermode: PowerMode) -> Result<(), Error<E>> {
         let reg = self.read_register(Registers::PWR_BW)?;     
         let mut data = reg & !Bitmasks::PWR_MASK;
         data |= powermode.value();      
@@ -60,7 +60,7 @@ where
     }
 
     /// Set resolution in bits
-    pub fn set_resolution(&self, resolution: RES) -> Result<(), Error<>> {
+    pub fn set_resolution(&self, resolution: Res) -> Result<(), Error<>> {
         let reg = self.read_register(Registers::RES_RANGE)?;     
         let mut data = reg & !Bitmasks::RESOLUTION;
         data |= resolution.value();      
@@ -69,7 +69,7 @@ where
     }
 
     /// Set acceleration range (full scale)
-    pub fn set_range(&self, range: RANGE) -> Result<(), Error<>> {
+    pub fn set_range(&self, range: Range) -> Result<(), Error<>> {
         let reg = self.read_register(Registers::RES_RANGE)?;     
         let mut data = reg & !Bitmasks::FS;
         data |= range.value();      
@@ -80,12 +80,12 @@ where
     /*
     /// Set output data rate        
     
-    pub fn set_datarate(&mut self, odr: ODR) -> Result<(), T::Error> {
+    pub fn set_datarate(&mut self, odr: DataRate) -> Result<(), T::Error> {
         let mut reg_data = [0u8];
         self.interface
             .read(Registers::CTRL_REG1.addr(), &mut reg_data)?;
         let mut payload = reg_data[0];
-        payload &= !Bitmasks::ODR_MASK;
+        payload &= !Bitmasks::DataRate_MASK;
         payload |= odr.value();
         self.interface.write(Registers::CTRL_REG1.addr(), payload)?;
         Ok(())

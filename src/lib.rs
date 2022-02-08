@@ -10,6 +10,8 @@ pub mod config;
 pub mod fifo;
 pub mod interrupt;
 pub mod register;
+use core::iter::FlatMap;
+
 use register::{Bitmasks, Registers};
 
 //pub mod interface;
@@ -113,7 +115,7 @@ where
 /// Output data rate and power mode selection (ODR). (see page 23)
 #[allow(non_camel_case_types)]
 #[derive(Debug, Clone, Copy)]
-pub enum ODR {    
+pub enum DataRate {    
     /// 1 Hz (not available in normal mode)
     _1Hz = 0b0000,
     /// 1.95 Hz (not available in normal mode)
@@ -138,7 +140,7 @@ pub enum ODR {
     _1000Hz = 0b1010,    
 }
 
-impl ODR {
+impl DataRate {
     pub fn value(self) -> u8 {
         self as u8
     }
@@ -147,7 +149,7 @@ impl ODR {
 /// Low power bandwidth. (see page 23)
 #[allow(non_camel_case_types)]
 #[derive(Debug, Clone, Copy)]
-pub enum BW {        
+pub enum BandWidth {        
     /// 1.95 Hz 
     _1_95Hz = 0b0010,
     /// 3.90 Hz
@@ -169,7 +171,7 @@ pub enum BW {
     
 }
 
-impl BW {
+impl BandWidth {
     pub fn value(self) -> u8 {
         (self as u8) << 1 // shifted into position
     }
@@ -179,7 +181,7 @@ impl BW {
 /// Power mode (see page 23)
 #[allow(non_camel_case_types)]
 #[derive(Debug, Clone, Copy)]
-pub enum PWR_MODE {
+pub enum PowerMode {
     /// Normal mode
     Normal = 0b00,
     /// Low power mode
@@ -188,7 +190,7 @@ pub enum PWR_MODE {
     Suspend = 0b10,    
 }
 
-impl PWR_MODE {
+impl PowerMode {
     pub fn value(self) -> u8 {
         (self as u8)  << 6 // shifted into the correct position
     }
@@ -198,7 +200,7 @@ impl PWR_MODE {
 /// Resolution of X/Y/Z axes. (see page 22)
 #[allow(non_camel_case_types)]
 #[derive(Debug, Clone, Copy)]
-pub enum RES {
+pub enum Res {
     /// 14-bit
     _14bit = 0b00,
     /// 12-bit
@@ -209,7 +211,7 @@ pub enum RES {
     _8bit = 0b11,
 }
 
-impl RES {
+impl Res {
     pub fn value(self) -> u8 {
         (self as u8) << 2 // shifted into the correct position
     }
@@ -218,7 +220,7 @@ impl RES {
 /// Acceleration range of X/Y/Z axes. (see page 23)
 #[allow(non_camel_case_types)]
 #[derive(Debug, Clone, Copy)]
-pub enum RANGE {
+pub enum Range {
     /// +/-2g
     _2g = 0b00,
     /// +/-4g
@@ -229,10 +231,22 @@ pub enum RANGE {
     _16g = 0b11,
 }
 
-impl RANGE {
+impl Range {
     pub fn value(self) -> u8 {
         self as u8 // shifted into the correct position
     }
+    
+    /// Return sensitivity value corresponding to the selected range
+    pub fn sensitivity(self) -> u16 {
+        use Range::*;
+        match self {
+            _2g => 4096,
+            _4g => 2048,
+            _8g => 1024,
+            _16g => 512,
+        }
+    }
+
 }
 
 
@@ -240,18 +254,18 @@ impl RANGE {
 /// Interrupt active setting for the INT1 pin: active high (default) or active low
 #[allow(non_camel_case_types)]
 #[derive(Debug, Clone, Copy)]
-pub enum INT_ACTIVE {
+pub enum IntActive {
     /// Active high
     High,
     /// Active low
     Low,
 }
 
-impl INT_ACTIVE {
+impl IntActive {
     pub fn status(self) -> bool {
         let status = match self {
-            INT_ACTIVE::High => false,
-            INT_ACTIVE::Low => true,
+            IntActive::High => false,
+            IntActive::Low => true,
         };
         status
     }
@@ -260,18 +274,18 @@ impl INT_ACTIVE {
 /// Interrupt pad setting for INT1 pin: push-pull (default) or open-drain.
 #[allow(non_camel_case_types)]
 #[derive(Debug, Clone, Copy)]
-pub enum INT_PIN {
+pub enum IntPin {
     /// Push-pull
     PushPull,
     /// Open drain
     OpenDrain,
 }
 
-impl INT_PIN {
+impl IntPin {
     pub fn status(self) -> bool {
         let status = match self {
-            INT_PIN::PushPull => false,
-            INT_PIN::OpenDrain => true,
+            IntPin::PushPull => false,
+            IntPin::OpenDrain => true,
         };
         status
     }
@@ -281,18 +295,18 @@ impl INT_PIN {
 /// Settings for various bit flags that can be Enabled (active) or Disabled (inactive)
 #[allow(non_camel_case_types)]
 #[derive(Debug, Clone, Copy)]
-pub enum FLAG {
+pub enum Flag {
     /// Enable (bit set)    
     Enable,
     /// Disable (bit cleared)
     Disable,
 }
 
-impl FLAG {
+impl Flag {
     pub fn status(self) -> bool {
         let status = match self {
-            FLAG::Disable => false,
-            FLAG::Enable => true,
+            Flag::Disable => false,
+            Flag::Enable => true,
         };
         status
     }
@@ -301,14 +315,14 @@ impl FLAG {
 /// Settings for various bit flags regarding activity and tap detection, which can be either positive or negative
 #[allow(non_camel_case_types)]
 #[derive(Debug, Clone, Copy)]
-pub enum SIGN {
+pub enum Sign {
     /// Positive (bit set)
     Positive,
     /// Negaitive (bit cleared)
     Negative,
 }
 
-impl SIGN {
+impl Sign {
     pub fn status(self) -> bool {
         let status = match self {
             SIGN::Negative => false,
@@ -321,18 +335,18 @@ impl SIGN {
 /// Settings for various bit flags regarding axis polarity and output swapping, which can be either positive or negative
 #[allow(non_camel_case_types)]
 #[derive(Debug, Clone, Copy)]
-pub enum POLARITY {
+pub enum Polarity {
     /// Normal (not reversed) (bit cleared)
     Normal,
     /// Reversed/Swapped (bit set)
     Reversed,
 }
 
-impl POLARITY {
+impl Polarity{
     pub fn status(self) -> bool {
         let status = match self {
-            POLARITY::Normal => false,
-            POLARITY::Reversed => true,
+            Polarity::Normal => false,
+            Polarity::Reversed => true,
         };
         status
     }
@@ -343,7 +357,7 @@ impl POLARITY {
 /// Orientation mode of the x/y axes selection. (see page 22)
 #[allow(non_camel_case_types)]
 #[derive(Debug, Clone, Copy)]
-pub enum ORIENT_XY {
+pub enum OrientXY {
     /// Portrait upright
     PortraitUpright = 0b00,
     /// Portrait upside down
@@ -354,7 +368,7 @@ pub enum ORIENT_XY {
     LandscapeRight = 0b11,
 }
 
-impl ORIENT_XY {
+impl OrientXY {
     pub fn value(self) -> u8 {
         (self as u8) << 5 // shifted into the correct position, can be used directly
     }
@@ -363,14 +377,14 @@ impl ORIENT_XY {
 /// Orientation mode of the z axis selection. (see page 22)
 #[allow(non_camel_case_types)]
 #[derive(Debug, Clone, Copy)]
-pub enum ORIENT_Z {
+pub enum OrientZ {
     /// Upward looking
     Upward = 0b00,
     /// Downward looking
     Downward = 0b01,
 }
 
-impl ORIENT_Z {
+impl OrientZ {
     pub fn value(self) -> u8 {
         self as u8 // shifted into the correct position, can be used directly
     }
@@ -383,7 +397,7 @@ impl ORIENT_Z {
 /// Interrupt latching (see page 25)
 #[allow(non_camel_case_types)]
 #[derive(Debug, Clone, Copy)]
-pub enum INT_LATCH {
+pub enum IntLatch {
  /// Non-latched
  NonLatched = 0b0000,
  /// temporary latched 250ms 0b0001
@@ -418,7 +432,7 @@ pub enum INT_LATCH {
  TempLatch_100ms = 0b1110, 
 }
 
-impl INT_LATCH {
+impl IntLatch {
     pub fn value(self) -> u8 {
         self as u8 // shifted into the correct position
     }
@@ -428,14 +442,14 @@ impl INT_LATCH {
 /// Tap quiet duration. (see page 27)
 #[allow(non_camel_case_types)]
 #[derive(Debug, Clone, Copy)]
-pub enum TAP_QUIET {
+pub enum TapQuiet {
     /// Tap quiet duration 30ms
     _30ms = 0b00,
     /// Tap quiet duration 50ms
     _50ms =  0b01,
 }
 
-impl TAP_QUIET {
+impl TapQuiet {
     pub fn value(self) -> u8 {
         (self as u8) << 7// shifted into the correct position, can be used directly
     }
@@ -444,14 +458,14 @@ impl TAP_QUIET {
 /// Tap shock duration. (see page 27)
 #[allow(non_camel_case_types)]
 #[derive(Debug, Clone, Copy)]
-pub enum TAP_SHOCK {
+pub enum TapShock {
     /// Tap shock duration 30ms
     _50ms = 0b00,
     /// Tap shock duration 50ms
     _70ms =  0b01,
 }
 
-impl TAP_SHOCK {
+impl TapShock {
     pub fn value(self) -> u8 {
         (self as u8) << 6 // shifted into the correct position, can be used directly
     }
@@ -460,7 +474,7 @@ impl TAP_SHOCK {
 /// Time window length for the second shock (see page 27)
 #[allow(non_camel_case_types)]
 #[derive(Debug, Clone, Copy)]
-pub enum TAP_DUR {
+pub enum TapDur {
     /// 50 ms
     _50ms = 0b000,
     /// 100 ms
@@ -480,7 +494,7 @@ pub enum TAP_DUR {
 
 }
 
-impl TAP_DUR {
+impl TapDur {
     pub fn value(self) -> u8 {
         self as u8 // shifted into the correct position, can be used directly
     }
@@ -491,7 +505,7 @@ impl TAP_DUR {
 #[derive(Debug, Clone, Copy)]
 
 // --- ?????? --- CHECK ADAFRUIT DRIVER
-pub enum THS_RANGE {    
+pub enum ThreshRange {    
     /*
     /// +/-2g
     _2g = 0b00,
@@ -504,7 +518,7 @@ pub enum THS_RANGE {
     */
 }
 
-impl THS_RANGE {
+impl ThreshRange {
     pub fn value(self) -> u8 {
         self as u8 // shifted into the correct position
     }
@@ -515,7 +529,7 @@ impl THS_RANGE {
 #[derive(Debug, Clone, Copy)]
 
 // --- ?????? --- CHECK ADAFRUIT DRIVER
-pub enum TAP_THS {    
+pub enum TapThresh {    
     /*
     /// +/-2g
     _2g = 0b00,
@@ -528,7 +542,7 @@ pub enum TAP_THS {
     */
 }
 
-impl TAP_THS {
+impl TapThresh {
     pub fn value(self) -> u8 {
         self as u8 // shifted into the correct position
     }
@@ -536,7 +550,7 @@ impl TAP_THS {
 
 
 /// Orientation interrupt blocking mode
-pub enum ORIENT_BLOCK {
+pub enum OrientBlock {
     /// No blocking 
     NoBlock = 0b00,
     /// Z-axis blocking 
@@ -548,14 +562,14 @@ pub enum ORIENT_BLOCK {
 
 }
 
-impl ORIENT_BLOCK {
+impl OrientBlock {
     pub fn value(self) -> u8 {
         (self as u8) << 2 // shifted into position
     }
 }
     
 /// Orientation interrupt threshold setting
-pub enum ORIENT_MODE {
+pub enum OrientMode {
     /// Symmetrical 
     Symmetrical = 0b00,
     /// High-asymmetrical 
@@ -567,7 +581,7 @@ pub enum ORIENT_MODE {
 
 }
 
-impl ORIENT_MODE {
+impl OrientMode {
     pub fn value(self) -> u8 {
         self as u8 // shifted into position
     }
@@ -577,18 +591,18 @@ impl ORIENT_MODE {
 /// Freefall mode. (see page 26)
 #[allow(non_camel_case_types)]
 #[derive(Debug, Clone, Copy)]
-pub enum FREEFALL_MODE {
+pub enum FreefallMode {
     /// Single mode
     Single,
     /// Sum mode
     Sum,
 }
 
-impl FREEFALL_MODE {
+impl FreefallMode {
     pub fn status(self) -> bool {
         let status = match self {
-            FREEFALL_MODE::Single => false,
-            FREEFALL_MODE::Sum => true,
+            FreefallMode::Single => false,
+            FreefallMode::Sum => true,
         };
         status
     }
