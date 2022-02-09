@@ -12,6 +12,9 @@ Inspired by and partially based on [another STMicroelectronics MEMS driver](http
 
 This driver allows you to:
 - read the device ID (0x13)
+- create a new instance of the driver
+- configure datarate, bandwidth, power mode, range (full scale) and bit resolution, and enable/disable axes
+- read the measurements 
 
 ## WORK IN PROGRESS:
 
@@ -19,7 +22,9 @@ This library is work in progress. Not all features are implemented yet. Currentl
 
 ### TO DO:
 
-- [ ] everything!
+- [ ] fix the configuration so that it only needs to be specified once
+- [ ] add interrupts configuration
+- [ ] add MCU examples (STM32, RP2040, nRF52)
 
 ## The device
 
