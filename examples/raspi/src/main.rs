@@ -15,11 +15,48 @@ fn main() {
 
     // create a new driver instance with the I2C interface and configuration settings      
     let mut msa301 = MSA301::new(i2c,
-                            AccelConfig {..Default::default()});
+                            AccelConfig {                                
+                                ..Default::default()
+                                /*
+                                enable_axes: (true, true, true),
+                                powermode: PowerMode::Normal,
+                                datarate: DataRate::_125Hz,
+                                bandwidth: BandWidth::_62_5Hz,
+                                resolution: Res::_14bit,
+                                range: Range::_2g,
+                                 */
+                                });
+
+    msa301.init_sensor(AccelConfig{..Default::default()}).unwrap();
+
+    let cfgodr = msa301.read_register(Registers::CFG_ODR).unwrap();
+    let resrange = msa301.read_register(Registers::RES_RANGE).unwrap();
+    let pwrbw = msa301.read_register(Registers::PWR_BW).unwrap();
+    
+    println!("CFG_ODR: {:08b}\nRES_RANGE: {:08b}\nPWR_BW: {:08b}\n", 
+                    cfgodr, resrange, pwrbw);
+    
+    /*
+    msa301.set_datarate(DataRate::_125Hz).unwrap();
+    msa301.set_bandwidth(BandWidth::_62_5Hz).unwrap();
+    
+    let cfgodr = msa301.read_register(Registers::CFG_ODR).unwrap();
+    let resrange = msa301.read_register(Registers::RES_RANGE).unwrap();
+    let pwrbw = msa301.read_register(Registers::PWR_BW).unwrap();
+    
+    println!("CFG_ODR: {:08b}\nRES_RANGE: {:08b}\nPWR_BW: {:08b}\n", 
+                    cfgodr, resrange, pwrbw);
+
+ */
+    let (x,y,z) = msa301.read_accel().unwrap();
+    println!("x {}, y {}, z {}\r\n", x, y, z);      
+
     
     loop {
         let (x,y,z) = msa301.read_accel().unwrap();
-        println!("x {}, y {}, z {}\r\n", x, y, z);        
+        //println!("x {}\r\n", x);        
+        //println!("y {}\r\n", y);        
+        println!("z {}\r\n", z);        
     }
-       
+    
 }
