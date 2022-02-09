@@ -33,17 +33,18 @@ where
     pub fn read_accel(&mut self) -> Result<(f32, f32, f32), Error<E>> {
         let (x_lo, x_hi, y_lo, y_hi, z_lo, z_hi) = self.read_accel_raw()?;
 
-        let scale = self.config.range.value();
+        // == SCALE MUST BE U16!! ==
+        let scale = self.config.range.sensitivity();
 
-        let mut raw_x: u16 = (x_hi as u16) << 8 + x_lo as u16; 
+        let mut raw_x: u16 = (x_hi as u16) << 8 | x_lo as u16; 
         raw_x = raw_x >> 2;        
         let x: f32 = raw_x as f32 / scale as f32;
 
-        let mut raw_y: u16 = (y_hi as u16) << 8 + y_lo as u16; 
+        let mut raw_y: u16 = (y_hi as u16) << 8 | y_lo as u16; 
         raw_y = raw_y >> 2;
         let y: f32 = raw_y as f32 / scale as f32;
 
-        let mut raw_z: u16 = (z_hi as u16) << 8 + z_lo as u16; 
+        let mut raw_z: u16 = (z_hi as u16) << 8 | z_lo as u16; 
         raw_z = raw_z >> 2;
         let z: f32 = raw_z as f32 / scale as f32;
 
