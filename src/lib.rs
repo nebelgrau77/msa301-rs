@@ -1,6 +1,33 @@
 //! A platform agnostic driver to interface with MSA301 digital accelerometer module.
 //!
 //! This driver allows you to:
+//! - configure datarate, bandwidth, power mode, resolution and range, and enable axes
+//! - read the measurements
+//! 
+//! ### Usage
+//! 
+//! ```rust
+//! use rppal::i2c::I2c;
+//! use msa301::*;
+//! use msa301::config::AccelConfig;
+//! use msa301::register::Registers;
+//! 
+//! fn main() {
+//! 
+//!     let i2c = I2c::new().unwrap();
+//!     // create a new driver instance with the I2C interface and configuration settings      
+//!     let mut msa301 = MSA301::new(i2c,
+//!                              AccelConfig {                                
+//!                                 ..Default::default()
+//!                             });
+//!     msa301.init_sensor(AccelConfig{..Default::default()}).unwrap();
+//! 
+//! loop {
+//!         let (x,y,z) = msa301.read_accel().unwrap(); 
+//!             println!("x {}, y {}, z {}\r\n", z);        
+//!     }
+//! ```
+//! 
 
 #![no_std]
 //#![deny(warnings, missing_docs)]
