@@ -16,10 +16,10 @@ fn main() {
     let config = AccelConfig{
                     enable_axes: (true, true, true),
                     powermode: PowerMode::Normal,
-                    datarate: DataRate::_125Hz,
-                    bandwidth: BandWidth::_62_5Hz,
+                    datarate: DataRate::_250Hz,
+                    bandwidth: BandWidth::_125Hz,
                     resolution: Res::_14bit,
-                    range: Range::_16g,
+                    range: Range::_4g,
     };
 
     // create a new driver instance with the I2C interface and configuration settings      
