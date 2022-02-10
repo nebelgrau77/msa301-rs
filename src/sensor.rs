@@ -36,17 +36,17 @@ where
         // == SCALE MUST BE U16!! ==
         let scale = self.config.range.sensitivity();
 
-        let mut raw_x: u16 = (x_hi as u16) << 8 | x_lo as u16; 
+        let mut raw_x: u16 = (x_hi as i16) << 8 | x_lo as i16; 
         raw_x = raw_x >> 2;        
-        let x: f32 = raw_x as f32 / scale as f32;
+        let x: f32 = raw_x as f32 / scale;
 
-        let mut raw_y: u16 = (y_hi as u16) << 8 | y_lo as u16; 
+        let mut raw_y: u16 = (y_hi as i16) << 8 | y_lo as i16; 
         raw_y = raw_y >> 2;
-        let y: f32 = raw_y as f32 / scale as f32;
+        let y: f32 = raw_y as f32 / scale;
 
-        let mut raw_z: u16 = (z_hi as u16) << 8 | z_lo as u16; 
+        let mut raw_z: u16 = (z_hi as i16) << 8 | z_lo as i16; 
         raw_z = raw_z >> 2;
-        let z: f32 = raw_z as f32 / scale as f32;
+        let z: f32 = raw_z as f32 / scale;
 
         Ok((x,y,z))
 

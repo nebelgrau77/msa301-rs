@@ -1,5 +1,8 @@
 //! A platform agnostic driver to interface with MSA301 digital accelerometer module.
 //!
+//! TO DO:
+//! * fix the configuration so that it is defined while initiating the driver (maybe in the new function?)
+//! 
 //! This driver allows you to:
 //! - configure datarate, bandwidth, power mode, resolution and range, and enable axes
 //! - read the measurements
@@ -260,13 +263,13 @@ impl Range {
     }
     
     /// Return sensitivity value corresponding to the selected range
-    pub fn sensitivity(self) -> u16 {
+    pub fn sensitivity(self) -> f32 {
         use Range::*;
         match self {
-            _2g => 4096,
-            _4g => 2048,
-            _8g => 1024,
-            _16g => 512,
+            _2g => 4096.0,
+            _4g => 2048.0,
+            _8g => 1024.0,
+            _16g => 512.0,
         }
     }
 }
