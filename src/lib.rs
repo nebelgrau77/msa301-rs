@@ -1,7 +1,11 @@
 //! A platform agnostic driver to interface with MSA301 digital accelerometer module.
 //!
 //! TO DO:
-//! * fix the configuration so that it is defined while initiating the driver (maybe in the new function?)
+//! * add new_with_configuration, so that new doesn't need one and uses the default
+//! * read_raw should return three i16 values, to be converted with scale in read
+//! * add interrupt functions
+//! * add status reading functions
+//! * begin_accel should check if settings are ok (datarate/bw/power mode) and maybe return an error
 //! 
 //! This driver allows you to:
 //! - configure datarate, bandwidth, power mode, resolution and range, and enable axes
@@ -91,6 +95,7 @@ where
         self.i2c
     }
 
+    /*
     /// Initialize sensor with a chosen configuration (default configuration can be used)
     pub fn init_sensor(&mut self, config: AccelConfig) -> Result<(), Error<E>> {
         self.write_register(Registers::CFG_ODR, config.cfg_odr())?;
@@ -98,6 +103,7 @@ where
         self.write_register(Registers::RES_RANGE, config.res_range())?;
         Ok(())
     }
+    */
 
     /// initialize with the configuration
     pub fn begin_accel(&mut self) -> Result<(), Error<E>> {

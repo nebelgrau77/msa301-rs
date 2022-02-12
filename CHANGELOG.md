@@ -7,15 +7,23 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+
+
+## [0.0.3] - 2022-02-12
+
 ### Added
 
 - `read_raw` and `read accel` added
 - `AccelConfig` added
-- `init` function added
 
 ### Changed
 - enum names are now CamelCase
 - MSA301 struct holds the AccelConfig struct
+- `begin_accel` initializes the sensor with configuration supplied in `new`
+- raw reading function returns an array
+
+### Fixed
+- wrong readings caused by unsigned vs unsigned
 
 ## [0.0.2] - 2022-02-08
 
