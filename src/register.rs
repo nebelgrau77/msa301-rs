@@ -98,6 +98,13 @@ impl Bitmasks {
     pub (crate) const ACTIVE_INT_EN_Y: u8 = 0b0000_0010;
     pub (crate) const ACTIVE_INT_EN_X: u8 = 0b0000_0001;
 
+    // === MOTION_INT = (0x09) ===
+    pub (crate) const ORIENT_INT: u8 = 0b0100_0000;
+    pub (crate) const S_TAP_INT: u8 = 0b0010_0000;
+    pub (crate) const D_TAP_INT: u8 = 0b0010_0000;
+    pub (crate) const ACTIVE_INT: u8 = 0b0000_0100;
+    pub (crate) const FREEFALL_INT: u8 = 0b0000_0001;
+
     // === RES_RANGE = (0x0F) ===
     pub (crate) const RESOLUTION: u8 = 0b0000_1100;
     pub (crate) const FS: u8 = 0b0000_0011;

@@ -77,40 +77,38 @@ pub struct MSA301<I2C> {
 impl <I2C, E> MSA301<I2C>
 where
     I2C: Write<Error = E> + WriteRead<Error = E>,
-{
-    
+{    
     /// Create a new instance of the LPS25HB driver.
-    pub fn new(i2c: I2C, config: AccelConfig) -> Result<Self, Error<E>> {
-        
-        let mut dev = MSA301 {
+    pub fn new(i2c: I2C, config: AccelConfig) -> Self {    
+        MSA301 {
             i2c,
             config: config
-        };
-        Ok(dev)
-    
+        }
+        
+        
+    }
+
+    pub fn init(&mut self) -> Result<(), Error<E>> {
+        self.write_register(Registers::CFG_ODR, self.config.cfg_odr())?;
+        self.write_register(Registers::PWR_BW, self.config.pwr_bw())?;
+        self.write_register(Registers::RES_RANGE, self.config.res_range())?;
+        Ok(())
+    }
+
+    pub fn get_config(&mut self) -> Result<AccelConfig, Error<E>> {
+        Ok(AccelConfig{
+            enable_axes: self.config.enable_axes,
+            powermode: self.config.powermode,
+            datarate: self.config.datarate,
+            bandwidth: self.config.bandwidth,
+            resolution: self.config.resolution,
+            range: self.config.range,
+        })
     }
 
     /// Destroy driver instance, return interface instance.
     pub fn destroy(self) -> I2C {
         self.i2c
-    }
-
-    /*
-    /// Initialize sensor with a chosen configuration (default configuration can be used)
-    pub fn init_sensor(&mut self, config: AccelConfig) -> Result<(), Error<E>> {
-        self.write_register(Registers::CFG_ODR, config.cfg_odr())?;
-        self.write_register(Registers::PWR_BW, config.pwr_bw())?;
-        self.write_register(Registers::RES_RANGE, config.res_range())?;
-        Ok(())
-    }
-    */
-
-    /// initialize with the configuration
-    pub fn begin_accel(&mut self) -> Result<(), Error<E>> {
-        self.write_register(Registers::CFG_ODR, self.config.cfg_odr())?;
-        self.write_register(Registers::PWR_BW, self.config.pwr_bw())?;
-        self.write_register(Registers::RES_RANGE, self.config.res_range())?;
-        Ok(())
     }
 
     /// Write to a register
@@ -129,6 +127,8 @@ where
             .map_err(Error::I2C)
             .and(Ok(data[0]))
     }
+
+
 
     // === THESE FUNCTIONS MAY NOT BE NECESSARY ===
 

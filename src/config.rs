@@ -97,12 +97,10 @@ where
     /// Set output data rate
     pub fn set_datarate(&mut self, odr: DataRate) -> Result<(), Error<E>> {
         let reg = self.read_register(Registers::CFG_ODR)?;
-
         let mut data = reg & !Bitmasks::ODR_MASK;
         data |= odr.value();
-
         self.write_register(Registers::CFG_ODR, data)?;
-
+        self.config.datarate = odr;
         Ok(())
     }
 
@@ -112,6 +110,7 @@ where
         let mut data = reg & !Bitmasks::BW_MASK;
         data |= bandwidth.value();      
         self.write_register(Registers::PWR_BW, data)?;      
+        self.config.bandwidth = bandwidth;
         Ok(())
     }
 
@@ -121,6 +120,7 @@ where
         let mut data = reg & !Bitmasks::PWR_MASK;
         data |= powermode.value();      
         self.write_register(Registers::PWR_BW, data)?;      
+        self.config.powermode = powermode;
         Ok(())
     }
 
@@ -129,7 +129,8 @@ where
         let reg = self.read_register(Registers::RES_RANGE)?;     
         let mut data = reg & !Bitmasks::RESOLUTION;
         data |= resolution.value();      
-        self.write_register(Registers::RES_RANGE, data)?;      
+        self.write_register(Registers::RES_RANGE, data)?;   
+        self.config.resolution = resolution;   
         Ok(())
     }
 
@@ -139,7 +140,13 @@ where
         let mut data = reg & !Bitmasks::FS;
         data |= range.value();      
         self.write_register(Registers::RES_RANGE, data)?;      
+        self.config.range = range;
         Ok(())
     }
    
+    /// get scaling factor
+    pub fn get_scale(&mut self) -> Result<f32, Error<E>> {
+        Ok(self.config.range.sensitivity())
+    }
+
 }

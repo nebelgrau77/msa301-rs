@@ -7,6 +7,18 @@
 
 use super::*;
 
+/// Motion interrupts status
+#[derive(Debug)]
+pub struct InterruptStatus {
+    pub orientation: bool,
+    pub single_tap: bool,
+    pub double_tap: bool,
+    pub active: bool,
+    pub freefall: bool,
+}
+
+
+
 impl<I2C, E> MSA301<I2C>
 where
     I2C: Write<Error = E> + WriteRead<Error = E>,
@@ -82,6 +94,36 @@ where
             Flag::Enable => self.set_register_bit_flag(Registers::INT_SET0, Bitmasks::ACTIVE_INT_EN_Z)?,
         }
         Ok(())
+    }
+
+    /// Get motion interrupts status
+    pub fn motion_int_status(&mut self) -> Result<InterruptStatus, Error<E>> {
+        let data = self.read_register(Registers::MOTION_INT)?;
+        let mask: u8 = 0b1111_1110;
+        let status = InterruptStatus {
+                        
+            orientation: match (data >> 6) &!mask {
+                1 => true,
+                _ => false,                
+            },
+            single_tap: match (data >> 5) &!mask  {
+                1 => true,
+                _ => false,
+            },
+            double_tap: match (data >> 4) &!mask  {
+                1 => true,
+                _ => false,
+            },
+            active: match (data >> 2) &!mask  {
+                1 => true,
+                _ => false,
+            },
+            freefall: match data &!mask  {
+                1 => true,
+                _ => false,
+            },
+        };
+        Ok(status)
     }
 
 }
