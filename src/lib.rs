@@ -74,9 +74,16 @@ impl <I2C, E> MSA301<I2C>
 where
     I2C: Write<Error = E> + WriteRead<Error = E>,
 {
+    
     /// Create a new instance of the LPS25HB driver.
-    pub fn new(i2c: I2C, config: AccelConfig) -> Self {
-        MSA301 { i2c, config }
+    pub fn new(i2c: I2C, config: AccelConfig) -> Result<Self, Error<E>> {
+        
+        let mut dev = MSA301 {
+            i2c,
+            config: config
+        };
+        Ok(dev)
+    
     }
 
     /// Destroy driver instance, return interface instance.
@@ -89,6 +96,14 @@ where
         self.write_register(Registers::CFG_ODR, config.cfg_odr())?;
         self.write_register(Registers::PWR_BW, config.pwr_bw())?;
         self.write_register(Registers::RES_RANGE, config.res_range())?;
+        Ok(())
+    }
+
+    /// initialize with the configuration
+    pub fn begin_accel(&mut self) -> Result<(), Error<E>> {
+        self.write_register(Registers::CFG_ODR, self.config.cfg_odr())?;
+        self.write_register(Registers::PWR_BW, self.config.pwr_bw())?;
+        self.write_register(Registers::RES_RANGE, self.config.res_range())?;
         Ok(())
     }
 

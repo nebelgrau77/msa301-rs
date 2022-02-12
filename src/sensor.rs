@@ -18,35 +18,28 @@ where
 
     // === MAKE THIS FUNCTION PRIVATE
     /// Read raw sensor values
-    pub fn read_accel_raw(&mut self) -> Result<(u8, u8, u8, u8, u8, u8), Error<E>> {
+    pub fn read_accel_raw(&mut self) -> Result<([u8;6]), Error<E>> {
         let mut data = [0_u8;6];
         self.i2c.write_read(DEV_ADDR, &[Registers::XAXIS_L.addr()], &mut data)
             .map_err(Error::I2C)
-            .and(Ok((data[0],data[1],data[2],data[3],data[4],data[5])))
-
-
-        // let p: i32 = (data[2] as i32) << 16 | (data[1] as i32) << 8 | (data[0] as i32);
-
-    }
+            .and(Ok(data))
+        }
 
     /// Read the accelerometer data correctly scaled
     pub fn read_accel(&mut self) -> Result<(f32, f32, f32), Error<E>> {
-        let (x_lo, x_hi, y_lo, y_hi, z_lo, z_hi) = self.read_accel_raw()?;
+        let raw_data = self.read_accel_raw()?;
 
-        // == SCALE MUST BE U16!! ==
         let scale = self.config.range.sensitivity();
 
-        let mut raw_x: i16 = (x_hi as i16) << 8 | x_lo as i16; 
-        raw_x = raw_x >> 2;        
-        let x: f32 = raw_x as f32 / scale;
-
-        let mut raw_y: i16 = (y_hi as i16) << 8 | y_lo as i16; 
+        let mut raw_x = (raw_data[1] as i16) << 8 | (raw_data[0] as i16);
+        raw_x = raw_x >> 2;
+        let x = (raw_x as f32) / scale;
+        let mut raw_y = (raw_data[3] as i16) << 8 | (raw_data[2] as i16);
         raw_y = raw_y >> 2;
-        let y: f32 = raw_y as f32 / scale;
-
-        let mut raw_z: i16 = (z_hi as i16) << 8 | z_lo as i16; 
+        let y = (raw_y as f32) / scale;
+        let mut raw_z = (raw_data[5] as i16) << 8 | (raw_data[4] as i16);
         raw_z = raw_z >> 2;
-        let z: f32 = raw_z as f32 / scale;
+        let z = (raw_z as f32) / scale;
 
         Ok((x,y,z))
 
