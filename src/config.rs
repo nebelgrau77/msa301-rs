@@ -104,7 +104,7 @@ where
         Ok(())
     }
 
-    /// Set bandwidth
+    /// Set bandwidth (in normal mode is always half of the datarate)
     pub fn set_bandwidth(&mut self, bandwidth: BandWidth) -> Result<(), Error<E>> {
         let reg = self.read_register(Registers::PWR_BW)?;     
         let mut data = reg & !Bitmasks::BW_MASK;
@@ -114,7 +114,7 @@ where
         Ok(())
     }
 
-    /// Set power mode
+    /// Set power mode (normal, suspend or low-power)
     pub fn set_power_mode(&mut self, powermode: PowerMode) -> Result<(), Error<E>> {
         let reg = self.read_register(Registers::PWR_BW)?;     
         let mut data = reg & !Bitmasks::PWR_MASK;
@@ -124,7 +124,7 @@ where
         Ok(())
     }
 
-    /// Set resolution in bits
+    /// Set resolution in bits (14, 12, 10 or 8 bits)
     pub fn set_resolution(&mut self, resolution: Res) -> Result<(), Error<E>> {
         let reg = self.read_register(Registers::RES_RANGE)?;     
         let mut data = reg & !Bitmasks::RESOLUTION;
@@ -134,7 +134,7 @@ where
         Ok(())
     }
 
-    /// Set acceleration range (full scale)
+    /// Set acceleration range (full scale +/-2g, +/-4g, +/-8g, +/-16g)
     pub fn set_range(&mut self, range: Range) -> Result<(), Error<E>> {
         let reg = self.read_register(Registers::RES_RANGE)?;     
         let mut data = reg & !Bitmasks::FS;
@@ -144,7 +144,7 @@ where
         Ok(())
     }
    
-    /// get scaling factor
+    /// Get scaling factor (FOR TEST ONLY)
     pub fn get_scale(&mut self) -> Result<f32, Error<E>> {
         Ok(self.config.range.sensitivity())
     }

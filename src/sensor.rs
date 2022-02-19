@@ -10,22 +10,28 @@ impl<I2C, E> MSA301<I2C>
 where
     I2C: Write<Error = E> + WriteRead<Error = E>,
 {
-    /// Read the device ID ("who am I")
+    /// Read the device ID ("who am I"). Returns decimal value 19.
     pub fn get_device_id(&mut self) -> Result<u8, Error<E>> {
         let whoami = self.read_register(Registers::PART_ID)?;
         Ok(whoami)
     }
-
-    // === MAKE THIS FUNCTION PRIVATE
+    
     /// Read raw sensor values
-    pub fn read_accel_raw(&mut self) -> Result<([u8;6]), Error<E>> {
+    fn read_accel_raw(&mut self) -> Result<([u8;6]), Error<E>> {
         let mut data = [0_u8;6];
         self.i2c.write_read(DEV_ADDR, &[Registers::XAXIS_L.addr()], &mut data)
             .map_err(Error::I2C)
             .and(Ok(data))
         }
 
-    /// Read the accelerometer data correctly scaled
+    /// Read the accelerometer data as a tuple, 
+    /// correctly scaled according to the selected range.
+    /// 
+    /// ```rust
+    /// let (x,y,z) = msa301.read_accel().unwrap();            
+    /// println!("x: {}, y: {}, z: {}\r\n", x,y, z);  
+    /// ```
+    /// 
     pub fn read_accel(&mut self) -> Result<(f32, f32, f32), Error<E>> {
         let raw_data = self.read_accel_raw()?;
 

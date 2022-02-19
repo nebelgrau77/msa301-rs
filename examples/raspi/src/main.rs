@@ -15,17 +15,16 @@ fn main() {
     // new I2C instance with rppal
     let i2c = I2c::new().unwrap();
 
-    // let mut msa301 = MSA301::new(i2c).unwrap();
+    // create a new driver with a default configuration
     let mut msa301 = MSA301::new(i2c, 
-                                AccelConfig{  enable_axes: (true, true, true),
-                                powermode: PowerMode::Normal,
-                                datarate: DataRate::_125Hz,
-                                bandwidth: BandWidth::_62_5Hz,
-                                resolution: Res::_14bit,
-                                range: Range::_2g,
-                                });
+                                
+                                AccelConfig{
+                                    datarate: DataRate::_125Hz,
+                                    bandwidth: BandWidth::_62_5Hz,
+                                    ..Default::default()},
+                                ).unwrap();
          
-    msa301.init().unwrap();
+    //msa301.init().unwrap();
     
     thread::sleep(Duration::from_millis(500));
 
@@ -76,7 +75,7 @@ fn main() {
     
     thread::sleep(Duration::from_millis(500));
 
-    msa301.set_power_mode(PowerMode::LowPower);
+    //msa301.set_power_mode(PowerMode::LowPower);
     
     let pwrbw = msa301.read_register(Registers::PWR_BW).unwrap();                                
     println!("PWR_BW: {:08b}\n", pwrbw);

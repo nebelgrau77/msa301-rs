@@ -22,17 +22,17 @@
 //! fn main() {
 //! 
 //!     let i2c = I2c::new().unwrap();
-//!     // create a new driver instance with the I2C interface and configuration settings      
+//!     // create a new driver instance with the I2C interface and default configuration settings      
 //!     let mut msa301 = MSA301::new(i2c,
 //!                              AccelConfig {                                
 //!                                 ..Default::default()
-//!                             });
-//!     msa301.init_sensor(AccelConfig{..Default::default()}).unwrap();
+//!                             }).unwrap();
 //! 
 //! loop {
 //!         let (x,y,z) = msa301.read_accel().unwrap(); 
-//!             println!("x {}, y {}, z {}\r\n", z);        
+//!             println!("x {}, y {}, z {}\r\n", x,y,z);        
 //!     }
+//! }
 //! ```
 //! 
 
@@ -78,23 +78,39 @@ impl <I2C, E> MSA301<I2C>
 where
     I2C: Write<Error = E> + WriteRead<Error = E>,
 {    
-    /// Create a new instance of the LPS25HB driver.
-    pub fn new(i2c: I2C, config: AccelConfig) -> Self {    
-        MSA301 {
+    /// Create a new instance of the MSA301 driver.
+    /// 
+    /// ```rust
+    ///  let mut msa301 = MSA301::new(i2c, 
+    ///                 AccelConfig{
+    ///                     datarate: DataRate::_125Hz,
+    ///                     bandwidth: BandWidth::_62_5Hz,
+    ///                     ..Default::default()},
+    ///                     ).unwrap(); 
+    /// ```    
+    pub fn new(i2c: I2C, config: AccelConfig) -> Result<Self, Error<E>> {    
+        
+        let mut msa = MSA301 {
             i2c,
             config: config
-        }
-        
-        
+        };        
+        msa.init()?;        
+        Ok(msa)
     }
 
-    pub fn init(&mut self) -> Result<(), Error<E>> {
+    fn init(&mut self) -> Result<(), Error<E>> {
         self.write_register(Registers::CFG_ODR, self.config.cfg_odr())?;
         self.write_register(Registers::PWR_BW, self.config.pwr_bw())?;
         self.write_register(Registers::RES_RANGE, self.config.res_range())?;
         Ok(())
     }
 
+    /// Read the current configuration of the sensor
+    /// 
+    /// ```rust
+    /// println!("{:?}", msa301.get_config().unwrap());
+    /// ```
+    /// 
     pub fn get_config(&mut self) -> Result<AccelConfig, Error<E>> {
         Ok(AccelConfig{
             enable_axes: self.config.enable_axes,
@@ -159,7 +175,6 @@ where
     }
     
 }
-
 
 
 /// Output data rate and power mode selection (ODR). (see page 23)
