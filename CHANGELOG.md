@@ -7,7 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
-
+### Added
+- reading interrupt status
+- setting interrupt latching
+- configure INT pin
 
 ## [0.0.3] - 2022-02-12
 

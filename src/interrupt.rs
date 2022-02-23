@@ -151,17 +151,9 @@ where
         Ok(())
     }
 
-    /// Check if new data available
-    pub fn is_new_data(&mut self) -> Result<bool, Error<E>> {
-        let data = self.read_register(Registers::DATA_INT)?;
-        match data & 0x1 {            
-            1 => Ok(true),
-            _ => Ok(false)            
-        }
-    }
 
     /// Configures the pin
-    pub fn pin_config(&mut self, output: IntPin, active: IntActive) -> Result<(), Error<E>> {
+    pub fn config_int_pin(&mut self, output: IntPin, active: IntActive) -> Result<(), Error<E>> {
         let mut data: u8 = 0;
 
         let pin_out: u8 = match output {
@@ -179,27 +171,13 @@ where
         self.write_register(Registers::INT_CFG, data)?;
 
         Ok(())
-
-
-
     }
 
-    /// TEST: route new data interrupt to pin INT
-    pub fn new_data_pin(&mut self, setting: Flag) -> Result<(), Error<E>> {
-                
-        let val = match setting {
-            Flag::Enable => 0x01,
-            Flag::Disable => 0x00,
-        };
+    /// Configure interrupt latching
+    pub fn config_int_latch(&mut self, reset: bool, setting: IntLatch) -> Result<(), Error<E>> {
+        
+        // should RESET be separated? probably!
 
-        self.write_register(Registers::INT_MAP1, val)?;
-
-        Ok(())
-
-    }
-
-    /// Set interrupt latching
-    pub fn set_int_latch(&mut self, reset: bool, setting: IntLatch) -> Result<(), Error<E>> {
         let reg = self.read_register(Registers::INT_LATCH)?;
         
         let mut data: u8 = 0;
@@ -208,7 +186,6 @@ where
             true => 0b1000_0000,
             false => 0b0000_0000,
         };
-
 
         // let mut data = reg & !Bitmasks::LATCH_INT;
 
@@ -248,55 +225,41 @@ where
         Ok(status)
     }
 
+
+        
+
+    /// Check if new data available
+    pub fn is_new_data(&mut self) -> Result<bool, Error<E>> {
+        let data = self.read_register(Registers::DATA_INT)?;
+        match data & 0x1 {            
+            1 => Ok(true),
+            _ => Ok(false)            
+        }
+    }
+
+        /*
+
+    /// TEST: route new data interrupt to pin INT
+    pub fn new_data_pin(&mut self, setting: Flag) -> Result<(), Error<E>> {
+                
+        let val = match setting {
+            Flag::Enable => 0x01,
+            Flag::Disable => 0x00,
+        };
+
+        self.write_register(Registers::INT_MAP1, val)?;
+
+        Ok(())
+
+    }
+
+    */
+
+
 }
 
 
 /*
-
-/// Interrupt pin settings
-#[derive(Debug)]
-pub struct InterruptConfig {
-    /// configure interrupt pin as active high or active low 
-    pub active_high_or_low: INT_ACTIVE, 
-    /// configure interrupt pin as  push-pull or open drain
-    pub pushpull_or_opendrain: INT_PIN,
-    /// configure data signal on the interrupt pin
-    pub data_signal_config: INT_DRDY,
-    /// enable FIFO full flag on interrupt pin
-    pub enable_fifo_full: FLAG, 
-    /// enable FIFO watermark flag on interrupt pin
-    pub enable_fifo_fth: FLAG, 
-    /// enable FIFO overrun flag on interrupt pin
-    pub enable_fifo_overrun: FLAG,
-    /// enable data ready signal on interrupt pin
-    pub enable_data_ready: FLAG,
-    /// enable latching interrupt request to INT_SOURCE register
-    pub enable_latch_interrupt: FLAG,
-    /// enable low pressure event on interrupt pin
-    pub enable_low_event: FLAG,
-    /// enable hihg pressure event on interrupt pin
-    pub enable_high_event: FLAG,
-    /// enable computing of differential pressure output
-    pub enable_differential: FLAG,
-}
-
-impl Default for InterruptConfig {
-    fn default() -> Self {
-        InterruptConfig {
-            active_high_or_low: INT_ACTIVE::High,                // active high (CTRL_REG3)
-            pushpull_or_opendrain: INT_PIN::PushPull,            // push-pull (CTRL_REG3)
-            data_signal_config: INT_DRDY::DataSignal,            // data signal on INT_DRDY pin (CTRL_REG3)
-            enable_fifo_full: FLAG::Disabled,                    // disabled (CTRL_REG3)
-            enable_fifo_fth: FLAG::Disabled,                     // disabled (CTRL_REG3)
-            enable_fifo_overrun: FLAG::Disabled,                 // disabled (CTRL_REG3)
-            enable_data_ready: FLAG::Disabled,                   // disabled (CTRL_REG3)
-            enable_latch_interrupt: FLAG::Disabled,              // interrupt request not latched (INTERRUPT_CFG)
-            enable_low_event: FLAG::Disabled,                    // disable interrupt request on low pressure event (INTERRUPT_CFG)
-            enable_high_event: FLAG::Disabled,                   // disable interrupt request on low pressure event (INTERRUPT_CFG)
-            enable_differential: FLAG::Disabled,                 // disabled (CTRL_REG1)
-        }
-    }
-}
 
 impl InterruptConfig {
     /// Returns values to be written to CTRL_REG3, CTRL_REG4 and INTERRUPT_CFG:
@@ -346,69 +309,3 @@ impl InterruptConfig {
  */
 
 
- /*
-
-#[derive(Debug)]
-/// Contents of the INT_SOURCE register (interrupt active and differential pressure events flags)
-pub struct IntStatus {
-    pub interrupt_active: bool,
-    pub diff_press_low: bool,
-    pub diff_press_high: bool,    
-}
-
-impl<T, E> LPS22HB<T>
-where
-    T: Interface<Error = E>,
-{
-    /// Enable interrupts and configure the interrupt pin
-    pub fn configure_interrupts(&mut self, 
-                                // flag: bool, 
-                                config: InterruptConfig)
-                                 -> Result<(), T::Error> {        
-        
-        // write the whole CTRL_REG3 register                                    
-        self.interface.write(Registers::CTRL_REG3.addr(), config.int_ctrl_reg3())?;                
-        
-        // get the contents of INTERRUPT_CFG and combine it with the bits to be set
-        let mut reg_data = [0u8;1];
-        self.read_register(Registers::INTERRUPT_CFG)?;        
-                
-        let mut interrupt_cfg = config.int_interrupt_cfg();
-               
-        let mut data: u8 = reg_data[0] & !0b00001111;
-
-        data = data | interrupt_cfg;
-
-        self.interface.write(Registers::INTERRUPT_CFG.addr(), data)?;        
-        
-        Ok(())
-    }
-    
-    
- /// Get all the flags from the INT_SOURCE register (NOTE: INT_SOURCE register is cleared by reading it)
- pub fn get_int_status(&mut self) -> Result<IntStatus, T::Error> {        
-                
-    let reg_value = self.read_register(Registers::INT_SOURCE)?;
-
-    let status = IntStatus {
-        /// Has any interrupt event been generated?
-        interrupt_active: match reg_value & Bitmasks::IA {
-            0 => false,
-            _ => true,
-        },
-        /// Has low differential pressure event been generated?
-        diff_press_low: match reg_value & Bitmasks::PL {
-            0 => false,
-            _ => true,
-        },
-        /// Has high differential pressure event been generated?
-        diff_press_high: match reg_value & Bitmasks::PH {
-            0 => false,
-            _ => true,
-        },           
-    };
-    Ok(status)
- }
-
-}
- */    
