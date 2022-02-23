@@ -17,6 +17,34 @@ pub struct InterruptStatus {
     pub freefall: bool,
 }
 
+/// Motion interrupts status
+#[derive(Debug)]
+pub struct InterruptConfig {
+    pub pin_output: IntPin,
+    pub pin_active: IntActive,
+    pub orientation: Flag,
+    pub single_tap: Flag,
+    pub double_tap: Flag,
+    pub active: Flag,
+    pub freefall: Flag,
+    pub new_data: Flag,
+}
+
+impl Default for InterruptConfig {
+    fn default() -> Self {
+        InterruptConfig {
+            pin_output: IntPin::PushPull,
+            pin_active: IntActive::High,
+            orientation: Flag::Disable,
+            single_tap: Flag::Disable,
+            double_tap: Flag::Disable,
+            active: Flag::Disable,
+            freefall: Flag::Disable,
+            new_data: Flag::Disable,
+        }
+    }    
+}
+
 impl<I2C, E> MSA301<I2C>
 where
     I2C: Write<Error = E> + WriteRead<Error = E>,
@@ -121,6 +149,73 @@ where
             Flag::Enable => self.set_register_bit_flag(Registers::INT_SET0, Bitmasks::ACTIVE_INT_EN_Z)?,
         }
         Ok(())
+    }
+
+    /// Check if new data available
+    pub fn is_new_data(&mut self) -> Result<bool, Error<E>> {
+        let data = self.read_register(Registers::DATA_INT)?;
+        match data & 0x1 {            
+            1 => Ok(true),
+            _ => Ok(false)            
+        }
+    }
+
+    /// Configures the pin
+    pub fn pin_config(&mut self, output: IntPin, active: IntActive) -> Result<(), Error<E>> {
+        let mut data: u8 = 0;
+
+        let pin_out: u8 = match output {
+            IntPin::OpenDrain => 1 << 1, // shifted into position
+            IntPin::PushPull => 0,
+        };
+
+        let pin_active: u8 = match active {
+            IntActive::High => 1,
+            IntActive::Low => 0,
+        };
+
+        data = data + pin_out + pin_active;
+
+        self.write_register(Registers::INT_CFG, data)?;
+
+        Ok(())
+
+
+
+    }
+
+    /// TEST: route new data interrupt to pin INT
+    pub fn new_data_pin(&mut self, setting: Flag) -> Result<(), Error<E>> {
+                
+        let val = match setting {
+            Flag::Enable => 0x01,
+            Flag::Disable => 0x00,
+        };
+
+        self.write_register(Registers::INT_MAP1, val)?;
+
+        Ok(())
+
+    }
+
+    /// Set interrupt latching
+    pub fn set_int_latch(&mut self, reset: bool, setting: IntLatch) -> Result<(), Error<E>> {
+        let reg = self.read_register(Registers::INT_LATCH)?;
+        
+        let mut data: u8 = 0;
+
+        data = match reset {
+            true => 0b1000_0000,
+            false => 0b0000_0000,
+        };
+
+
+        // let mut data = reg & !Bitmasks::LATCH_INT;
+
+        data |= setting.value();
+
+        Ok(())
+
     }
 
     /// Get motion interrupts status

@@ -119,6 +119,10 @@ impl Bitmasks {
     // === INT_SET_1 (0x17) ===
     pub (crate) const NEW_DATA_INT_EN: u8 = 0b0001_0000;
     pub (crate) const FREEFALL_INT_EN: u8 = 0b0000_1000;
+
+    // === INT_LATCH (0x21) ===
+    pub(crate) const RESET_INT: u8 = 0b1000_0000;
+    pub(crate) const LATCH_INT: u8 = 0b0111_1111;
 }
 
 

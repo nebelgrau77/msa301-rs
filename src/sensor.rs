@@ -51,6 +51,15 @@ where
 
     }
 
+
+    // == ADD QUANTIZED OUTPUT
+
+    /*
+    
+    should this return [i8;4], or (i8,i8,i8), or maybe u32 with the single bytes representing x: i8, y: i8, z: i8, scale (2,4,8 or 16)
+    
+    */
+
     /*
 
     /// Set the pressure offset value (VALUE IN hPA!)
