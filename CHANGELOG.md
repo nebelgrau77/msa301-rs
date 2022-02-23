@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.0.4] - 2022-02-23
+
+### Changed
+- repo status changed to public
+
 ### Added
 - reading interrupt status
 - setting interrupt latching
