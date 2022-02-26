@@ -54,12 +54,12 @@ then instantiate the device.
 
 Please find additional examples using hardware in this repository: [examples]
 
-[examples]: https://github.com/nebelgrau77/lps22hb-rs/tree/main/examples
+[examples]: https://github.com/nebelgrau77/msa301-rs/tree/main/examples
 
 ## Support
 
 For questions, issues, feature requests, and other changes, please file an
-[issue in the github project](https://github.com/nebelgrau77/lps22hb-rs/issues).
+[issue in the github project](https://github.com/nebelgrau77/msa301-rs/issues).
 
 ## License
 

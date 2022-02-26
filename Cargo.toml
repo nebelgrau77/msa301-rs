@@ -9,7 +9,7 @@ description = "A platform agnostic driver to interface with MSA301 digital accel
 readme = "README.md"
 keywords = ["embedded-hal-driver", "sensor", "MEMS", "msa301", "IMU", "accelerometer"]
 license = "MIT"
-repository = "https://github.com/nebelgrau77/lps22hb-rs"
+repository = "https://github.com/nebelgrau77/msa301-rs"
 
 [dependencies]
 embedded-hal  = { version = "0.2" }
